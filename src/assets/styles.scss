@@ -1,0 +1,49 @@
+/* You can add global styles to this file, and also import other style files */
+@use 'primeicons/primeicons.css';
+@use '../assets/tailwind.css';
+@use '../assets/layout/layout.scss';
+@use '../assets/demo/demo.scss';
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #ticket, #ticket * {
+    visibility: visible;
+  }
+
+  #ticket {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;  /* Ajusta el tamaño si es necesario */
+  }
+}
+// =====================
+// CUSTOM TAG COLORS
+// =====================
+
+.tag-done {
+  background-color: #22c55e !important;
+  color: white !important;
+}
+
+.tag-error {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+.tag-pending {
+  background-color: #f59e0b !important;
+  color: white !important;
+}
+
+.tag-processing {
+  background-color: #facc15 !important;
+  color: black !important;
+}
+
+.tag-default {
+  background-color: #e5e7eb; /* gris */
+  color: #374151;
+}
