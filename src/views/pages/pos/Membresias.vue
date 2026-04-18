@@ -114,20 +114,20 @@ const syncStatus = (sale) => {
 
     return 'N/A';
 };
-const getTagSeverity = (status) => {
-    switch (status) {
-        case 'DONE':
-            return 'success';
-        case 'ERROR':
-            return 'danger';
-        case 'PENDING':
-            return 'warning';
-        case 'PROCESSING':
-            return 'warning';
-        default:
-            return 'info'; // 👈 NUNCA null
-    }
-};
+// const getTagSeverity = (status) => {
+//     switch (status) {
+//         case 'DONE':
+//             return 'success';
+//         case 'ERROR':
+//             return 'danger';
+//         case 'PENDING':
+//             return 'warning';
+//         case 'PROCESSING':
+//             return 'warning';
+//         default:
+//             return 'info'; // 👈 NUNCA null
+//     }
+// };
 const getSyncLabel = (status) => {
     switch (status) {
         case 'DONE':
@@ -223,20 +223,20 @@ function formatCurrency(value) {
 // =====================
 // BOTON RETRY
 // =====================
-const getSeverity = (status) => {
-    switch (status) {
-        case 'DONE':
-            return 'success';
-        case 'ERROR':
-            return 'danger';
-        case 'PENDING':
-            return 'warning';
-        case 'PROCESSING':
-            return 'warning';
-        default:
-            return 'N/A';
-    }
-};
+// const getSeverity = (status) => {
+//     switch (status) {
+//         case 'DONE':
+//             return 'success';
+//         case 'ERROR':
+//             return 'danger';
+//         case 'PENDING':
+//             return 'warning';
+//         case 'PROCESSING':
+//             return 'warning';
+//         default:
+//             return 'N/A';
+//     }
+// };
 
 const getTagClass = (status) => {
     const map = {
@@ -280,10 +280,10 @@ const retry = async (id) => {
 // =====================
 // COMMAND STATUS
 // =====================
-const getStatus = (sale, type) => {
-    const cmd = sale.commands?.find((c) => c.type === type);
-    return cmd?.status || 'N/A';
-};
+// const getStatus = (sale, type) => {
+//     const cmd = sale.commands?.find((c) => c.type === type);
+//     return cmd?.status || 'N/A';
+// };
 
 // =====================
 // INIT
@@ -298,7 +298,7 @@ onMounted(async () => {
         <!-- TOOLBAR -->
         <Toolbar class="mb-6">
             <template #start>
-                <Button label="Vender Membresía" v-if="canCreate" icon="pi pi-plus" severity="secondary"
+                <Button v-if="canCreate" label="Vender Membresía" icon="pi pi-plus" severity="secondary"
                     @click="openCreate" />
             </template>
         </Toolbar>
@@ -312,19 +312,19 @@ onMounted(async () => {
             <InputText v-model="filters.search" placeholder="Cliente..." />
 
             <!-- Plan -->
-            <Dropdown v-model="filters.planId" :options="plans" optionLabel="name" optionValue="id" placeholder="Plan"
-                showClear />
+            <Dropdown v-model="filters.planId" :options="plans" option-label="name" option-value="id" placeholder="Plan"
+                show-clear />
 
             <!-- Vendedor -->
-            <Dropdown v-model="filters.userId" :options="users" optionLabel="fullName" optionValue="id"
-                placeholder="Vendedor" showClear />
+            <Dropdown v-model="filters.userId" :options="users" option-label="fullName" option-value="id"
+                placeholder="Vendedor" show-clear />
 
             <!-- Fecha -->
-            <Calendar v-model="filters.from" placeholder="Desde" dateFormat="dd/mm/yy" showIcon />
+            <Calendar v-model="filters.from" placeholder="Desde" date-format="dd/mm/yy" show-icon />
 
-            <Calendar v-model="filters.to" placeholder="Hasta" dateFormat="dd/mm/yy" showIcon />
+            <Calendar v-model="filters.to" placeholder="Hasta" date-format="dd/mm/yy" show-icon />
             <!-- Estado -->
-            <Dropdown v-model="filters.status" :options="statusOptions" placeholder="Estado" showClear />
+            <Dropdown v-model="filters.status" :options="statusOptions" placeholder="Estado" show-clear />
 
             <!-- Botón -->
             <Button label="Filtrar" icon="pi pi-search" @click="loadData" />
@@ -390,7 +390,7 @@ onMounted(async () => {
             <!-- CLIENTE -->
             <div class="field">
                 <label>Cliente</label>
-                <Dropdown v-model="form.partnerId" :options="partners" optionLabel="name" optionValue="id"
+                <Dropdown v-model="form.partnerId" :options="partners" option-label="name" option-value="id"
                     placeholder="Seleccionar cliente" class="w-full" />
             </div>
 
@@ -407,7 +407,7 @@ onMounted(async () => {
             <!-- PLAN -->
             <div class="field">
                 <label>Plan</label>
-                <Dropdown v-model="form.planId" :options="plans" optionLabel="name" optionValue="id"
+                <Dropdown v-model="form.planId" :options="plans" option-label="name" option-value="id"
                     placeholder="Seleccionar plan" class="w-full" />
             </div>
 
