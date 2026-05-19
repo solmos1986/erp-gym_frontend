@@ -5,6 +5,7 @@ import { computed, onMounted, ref } from 'vue';
 import CompanyService from '../../service/company.service';
 import PermissionTenantService from '../../service/permissionTenant.service';
 import { useAuthStore } from '../../store/auth.store';
+import BranchTable from './BranchTable.vue';
 
 const toast = useToast();
 const auth = useAuthStore();
@@ -40,7 +41,10 @@ const canView = computed(() => auth.can('SYSTEM_COMPANIES_VIEW'));
 const canCreate = computed(() => auth.can('SYSTEM_COMPANIES_CREATE'));
 const canUpdate = computed(() => auth.can('SYSTEM_COMPANIES_EDIT'));
 const canDelete = computed(() => auth.can('SYSTEM_COMPANIES_DELETE'));
-
+/**
+ * Expandir sucursales
+ */
+const expandedRows = ref([]);
 /**
  * Load
  */
@@ -88,32 +92,58 @@ function openCreate() {
 /**
  * Editar
  */
+// function openEdit(company) {
+//     console.log(company);
+//     if (!canUpdate.value) return;
+
+//     editingCompany.value = company;
+
+//     form.value = {
+//         name: company.name
+//     };
+//     // 🔥 AUTOSELECCIONAR PERMISOS
+//     selectedPermissions.value = company.companyPermissions.map((p) => p.permissionId);
+//     dialogVisible.value = true;
+// }
 function openEdit(company) {
-    console.log(company);
     if (!canUpdate.value) return;
 
     editingCompany.value = company;
 
     form.value = {
-        name: company.name
+        name: company.name,
+        fullName: company.owner?.fullName || '',
+        email: company.owner?.email || '',
+        password: '' // 🔥 nunca cargar real
     };
-    // 🔥 AUTOSELECCIONAR PERMISOS
-    selectedPermissions.value = company.companyPermissions.map((p) => p.permissionId);
+
+    // 🔥 IMPORTANTE (tu nuevo backend)
+    selectedPermissions.value = company.permissions || [];
+
     dialogVisible.value = true;
 }
-
 /**
  * Validación
  */
 function validateForm() {
+    // 🏢 nombre empresa
     if (!form.value.name) {
         toast.add({ severity: 'warn', summary: 'Nombre requerido' });
         return false;
     }
 
+    // 🔐 permisos (solo en CREATE)
     if (!editingCompany.value && selectedPermissions.value.length === 0) {
         toast.add({ severity: 'warn', summary: 'Debe seleccionar al menos un permiso' });
         return false;
+    }
+
+    // 👤 datos del OWNER (solo en CREATE)
+    if (!editingCompany.value) {
+        if (!form.value.fullName || !form.value.email || !form.value.password) {
+            toast.add({ severity: 'warn', summary: 'Datos de usuario requeridos' });
+            return false;
+        }
     }
 
     return true;
@@ -133,8 +163,15 @@ async function save() {
         // 🔥 payload común
         const payload = {
             name: form.value.name,
+            fullName: form.value.fullName,
+            email: form.value.email,
             permissions: selectedPermissions.value
         };
+
+        // 🔐 password opcional
+        if (form.value.password && form.value.password.trim() !== '') {
+            payload.password = form.value.password;
+        }
 
         // =========================
         // 🔥 UPDATE
@@ -253,7 +290,7 @@ onMounted(() => {
         <!-- HEADER -->
         <Toolbar class="mb-6">
             <template #start>
-                <Button label="Nueva Empresa" v-if="canCreate" icon="pi pi-plus" severity="secondary"
+                <Button v-if="canCreate" label="Nueva Empresa" icon="pi pi-plus" severity="secondary"
                     @click="openCreate" />
             </template>
         </Toolbar>
@@ -261,25 +298,35 @@ onMounted(() => {
         <h3 class="mb-3">Empresas</h3>
 
         <!-- LISTADO -->
-        <DataTable v-if="canView" :value="companies" :loading="loading" :rows="20">
+        <DataTable v-if="canView" v-model:expanded-rows="expandedRows" :value="companies" :loading="loading"
+            data-key="id">
+            <!-- 🔥 COLUMNA EXPAND -->
+            <Column expander style="width: 3rem" />
+
             <Column field="name" header="Nombre" />
+
             <Column header="Estado">
                 <template #body="{ data }">
                     <Tag :value="data.isActive ? 'Activa' : 'Inactiva'"
                         :severity="data.isActive ? 'success' : 'danger'" />
                 </template>
             </Column>
+
             <Column header="Acciones">
                 <template #body="{ data }">
-                    <Button icon="pi pi-pencil" outlined rounded v-if="canUpdate" @click="openEdit(data)" />
-                    <Button icon="pi pi-ban" outlined rounded severity="warning" v-if="canDelete && data.isActive"
+                    <Button v-if="canUpdate" icon="pi pi-pencil" outlined rounded @click="openEdit(data)" />
+                    <Button v-if="canDelete && data.isActive" icon="pi pi-ban" outlined rounded severity="warning"
                         @click="remove(data)" />
-
-                    <!-- ACTIVAR -->
-                    <Button icon="pi pi-check" outlined rounded severity="success" v-if="canUpdate && !data.isActive"
+                    <Button v-if="canUpdate && !data.isActive" icon="pi pi-check" outlined rounded severity="success"
                         @click="activate(data)" />
                 </template>
             </Column>
+
+            <!-- 🔥 CONTENIDO AL EXPANDIR -->
+            <template #expansion="slotProps">
+                <BranchTable :company="slotProps.data" @reload="loadCompanies" />
+            </template>
+
         </DataTable>
 
         <!-- DIALOG -->
@@ -292,7 +339,7 @@ onMounted(() => {
                 <InputText v-model="form.name" class="w-full" />
             </div>
             <div class="field mb-3">
-                <input type="file" @change="onLogoChange" accept="image/*" />
+                <input type="file" accept="image/*" @change="onLogoChange" />
             </div>
 
             <img v-if="logoPreview" :src="logoPreview" width="80" />
@@ -303,29 +350,29 @@ onMounted(() => {
             <div class="field mb-3">
                 <label>Permisos (Módulos)</label>
 
-                <MultiSelect v-model="selectedPermissions" :options="tenantPermissions" optionLabel="code"
-                    optionValue="id" placeholder="Seleccionar permisos" class="w-full" display="chip" />
+                <MultiSelect v-model="selectedPermissions" :options="tenantPermissions" option-label="code"
+                    option-value="id" placeholder="Seleccionar permisos" class="w-full" display="chip" />
             </div>
 
             <!-- ===================== -->
             <!-- 🔒 SOLO CREATE -->
             <!-- ===================== -->
-            <template v-if="!editingCompany">
-                <div class="field mb-3">
-                    <label>Nombre Owner</label>
-                    <InputText v-model="form.fullName" class="w-full" />
-                </div>
 
-                <div class="field mb-3">
-                    <label>Email</label>
-                    <InputText v-model="form.email" class="w-full" />
-                </div>
+            <div class="field mb-3">
+                <label>Nombre Owner</label>
+                <InputText v-model="form.fullName" class="w-full" />
+            </div>
 
-                <div class="field mb-3">
-                    <label>Password</label>
-                    <Password v-model="form.password" toggleMask class="w-full" />
-                </div>
-            </template>
+            <div class="field mb-3">
+                <label>Email</label>
+                <InputText v-model="form.email" class="w-full" />
+            </div>
+
+            <div class="field mb-3">
+                <label>Password</label>
+                <Password v-model="form.password" toggle-mask class="w-full" />
+            </div>
+
 
             <!-- ===================== -->
             <!-- BOTONES -->

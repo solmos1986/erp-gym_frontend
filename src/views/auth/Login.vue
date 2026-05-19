@@ -12,8 +12,8 @@ const loading = ref(false);
 const checked = ref(false); // ✅ FALTABA
 
 const form = ref({
-    email: 'admin@erp.com',
-    password: '123456'
+    email: '',
+    password: ''
 });
 
 const submit = async () => {
@@ -26,6 +26,7 @@ const submit = async () => {
         await auth.login(form.value);
         router.push('/'); // o '/platform/companies' si es superadmin
     } catch (error) {
+        console.log('ENTRO AL CATCH', error);
         toast.add({
             severity: 'error',
             summary: 'Error de autenticación',
@@ -55,13 +56,14 @@ const submit = async () => {
                     <div>
                         <label class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2"> Email
                         </label>
-                        <InputText type="email" class="w-full md:w-[30rem] mb-8" v-model="form.email" />
+                        <InputText v-model="form.email" type="email" placeholder="Usuario"
+                            class="w-full md:w-[30rem] mb-8" />
 
                         <label class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2"> Password
                         </label>
                         <!-- 🔥 AQUÍ ESTABA EL ERROR -->
                         <!-- <Password v-model:modelValue="form.password" :toggleMask="true" class="mb-4 w-full" :feedback="false" /> -->
-                        <Password id="password" v-model="form.password" placeholder="Password" :toggleMask="true"
+                        <Password id="password" v-model="form.password" placeholder="Password" :toggle-mask="true"
                             class="mb-4" fluid :feedback="false"></Password>
                         <div class="flex items-center justify-between mt-2 mb-8 gap-8">
                             <div class="flex items-center">

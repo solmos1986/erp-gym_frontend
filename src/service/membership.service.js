@@ -32,12 +32,11 @@ class MembershipService {
         const { data } = await api.post('/memberships/purchase', payload);
         return data;
     }
-
-    /**
-     * ❌ Cancelar membresía (opcional - historial)
+    /** 🚫 Anular inscripción
      */
-    static async cancel(id) {
-        const { data } = await api.delete(`/memberships/${id}`);
+    static async annul(id) {
+        const { data } = await api.post(`/memberships/${id}/annul`);
+
         return data;
     }
 
@@ -60,6 +59,14 @@ class MembershipService {
         });
 
         return response;
+    }
+    static async sync(customerId) {
+        const { data } = await api.post(`/memberships/sync/${customerId}`);
+        return data;
+    }
+    static async assign(payload) {
+        const { data } = await api.post('/memberships/assign', payload);
+        return data;
     }
 }
 

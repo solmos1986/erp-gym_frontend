@@ -71,6 +71,27 @@ function openEdit(plan) {
 
     dialogVisible.value = true;
 }
+async function activate(row) {
+    try {
+        await PlanService.activate(row.id);
+
+        toast.add({
+            severity: 'success',
+            summary: 'Plan activado',
+            life: 3000
+        });
+
+        await loadPlans();
+
+    } catch (e) {
+        console.error(e);
+        toast.add({
+            severity: 'error',
+            summary: 'Error al activar',
+            life: 3000
+        });
+    }
+}
 
 async function save() {
     try {
@@ -114,7 +135,7 @@ onMounted(async () => {
     <div class="card">
         <Toolbar class="mb-6">
             <template #start>
-                <Button label="Nuevo Plan" v-if="canCreate" icon="pi pi-plus" severity="secondary" class="mr-2"
+                <Button v-if="canCreate" label="Nuevo Plan" icon="pi pi-plus" severity="secondary" class="mr-2"
                     @click="openCreate" />
             </template>
         </Toolbar>
@@ -139,7 +160,13 @@ onMounted(async () => {
             <Column header="Acciones">
                 <template #body="{ data }">
                     <Button v-if="canUpdate" icon="pi pi-pencil" text @click="openEdit(data)" />
-                    <Button v-if="canDelete" icon="pi pi-trash" text severity="danger" @click="remove(data)" />
+                    <!-- 🗑️ ELIMINAR SOLO SI ESTÁ ACTIVO -->
+                    <Button v-if="data.isActive && canDelete" icon="pi pi-trash" text severity="danger"
+                        @click="remove(data)" />
+
+                    <!-- ♻️ ACTIVAR SI ESTÁ INACTIVO -->
+                    <Button v-if="!data.isActive && canUpdate" icon="pi pi-refresh" text severity="success"
+                        @click="activate(data)" />
                 </template>
             </Column>
         </DataTable>

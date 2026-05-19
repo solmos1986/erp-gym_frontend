@@ -57,7 +57,7 @@ const model = [
                 label: 'Dashboard',
                 icon: 'pi pi-chart-line',
                 to: '/dashboard',
-                permission: 'ERP_TREASURY_VIEW' // Permiso para ver el dashboard
+                permission: 'TENANT_DASHBOARD_VIEW' // Permiso para ver el dashboard
             },
             // {
             //     label: 'Productos',

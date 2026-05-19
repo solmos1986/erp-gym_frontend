@@ -24,7 +24,7 @@ const editingId = ref(null);
 const form = ref({
     name: '',
     ip: '',
-    port: 8000,
+    port: 80,
     username: '',
     password: '',
     deviceType: 'ACCESS_CONTROL',
@@ -49,8 +49,11 @@ const canDelete = computed(() => auth.can('TENANT_DEVICES_DELETE'));
 // CARGA
 // =====================
 async function loadAll() {
+
     loading.value = true;
     try {
+        console.log("download agent - auth:", auth);
+        console.log("auth.user:", auth.user);
         devices.value = await DeviceService.getAll();
         branches.value = await BranchService.getAll();
         console.log('branches cargados:', branches.value);
@@ -68,7 +71,7 @@ function openCreate() {
     form.value = {
         name: '',
         ip: '',
-        port: 8000,
+        port: 80,
         username: '',
         password: '',
         deviceType: 'ACCESS_CONTROL',
@@ -87,7 +90,7 @@ function openEdit(device) {
         ip: device.ip,
         port: device.port,
         username: device.username,
-        password: device.password,
+        password: '',
         deviceType: device.deviceType,
         brand: device.brand,
         branchId: device.branchId
@@ -160,6 +163,8 @@ async function remove(id) {
     }
 }
 
+
+
 // =====================
 // INIT
 // =====================
@@ -173,7 +178,7 @@ onMounted(async () => {
         <!-- TOOLBAR -->
         <Toolbar class="mb-6">
             <template #start>
-                <Button label="Nuevo Device" icon="pi pi-plus" severity="secondary" v-if="canCreate"
+                <Button v-if="canCreate" label="New Device" icon="pi pi-plus" severity="secondary"
                     @click="openCreate" />
             </template>
         </Toolbar>
@@ -206,8 +211,8 @@ onMounted(async () => {
             </Column>
             <Column header="Acciones">
                 <template #body="{ data }">
-                    <Button icon="pi pi-pencil" text v-if="canEdit" @click="openEdit(data)" />
-                    <Button icon="pi pi-trash" text severity="danger" v-if="canDelete" @click="remove(data.id)" />
+                    <Button v-if="canEdit" icon="pi pi-pencil" text @click="openEdit(data)" />
+                    <Button v-if="canDelete" icon="pi pi-trash" text severity="danger" @click="remove(data.id)" />
                 </template>
             </Column>
         </DataTable>
@@ -236,7 +241,7 @@ onMounted(async () => {
 
             <div class="field">
                 <label>Password</label>
-                <InputText v-model="form.password" class="w-full" />
+                <InputText v-model="form.password" type="password" class="w-full" placeholder="*******" />
             </div>
 
             <div class="field">
@@ -252,7 +257,7 @@ onMounted(async () => {
 
             <div class="field">
                 <label>Sucursal</label>
-                <Dropdown v-model="form.branchId" :options="branches" optionLabel="name" optionValue="id"
+                <Dropdown v-model="form.branchId" :options="branches" option-label="name" option-value="id"
                     placeholder="Seleccionar sucursal" class="w-full" />
             </div>
 

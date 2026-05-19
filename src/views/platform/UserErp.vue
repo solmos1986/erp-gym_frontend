@@ -136,7 +136,7 @@ onMounted(async () => {
     <div class="card">
         <Toolbar class="mb-6">
             <template #start>
-                <Button label="Nuevo Usuario" v-if="canCreate" icon="pi pi-plus" severity="secondary" class="mr-2"
+                <Button v-if="canCreate" label="Nuevo Usuario" icon="pi pi-plus" severity="secondary" class="mr-2"
                     @click="openCreate" />
             </template>
 
@@ -188,19 +188,20 @@ onMounted(async () => {
 
             <div class="field">
                 <label>Sucursal</label>
-                <Dropdown v-model="form.branchId" :options="branches" optionLabel="name" optionValue="id"
+                <Dropdown v-model="form.branchId" :options="branches" option-label="name" option-value="id"
                     placeholder="Seleccione sucursal" class="w-full" />
             </div>
 
             <div class="field">
                 <label>Roles</label>
-                <MultiSelect v-model="form.roles" :options="allroles" optionLabel="name" optionValue="id"
+                <MultiSelect v-model="form.roles" :options="allroles" option-label="name" option-value="id"
                     class="w-full" />
             </div>
 
             <div class="field">
                 <label>Password</label>
-                <Password v-model="form.password" toggleMask class="w-full" :feedback="false" />
+                <Password v-model="form.password" type="password" placeholder="*******" toggle-mask class="w-full"
+                    :feedback="false" />
             </div>
 
             <div class="flex justify-content-end gap-2">

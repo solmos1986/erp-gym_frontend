@@ -2,39 +2,79 @@
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref, watch } from 'vue';
 
-import { formatDate } from '@/utils/date';
+import { formatDate, formatDateTimeNoTZ2 } from '@/utils/date';
 import MembershipService from '../../../service/membership.service';
 import PartnerService from '../../../service/partner.service';
 import PlanService from '../../../service/plan.service';
-import UserService from '../../../service/user.service'; // 👈 NUEVO
+import UserService from '../../../service/user.service';
 import { useAuthStore } from '../../../store/auth.store';
 
+// 🔥 NUEVO (WS)
+let ws;
+
+// =====================
+// WS CONNECT
+// =====================
+function connectWebSocket() {
+    ws = new WebSocket("wss://apigymcloud.aplus-security.com/ws/");
+
+    ws.onopen = () => {
+        console.log("🟢 WS conectado (frontend)");
+
+        ws.send(JSON.stringify({
+            type: "REGISTER_FRONTEND"
+        }));
+    };
+
+    ws.onmessage = async (event) => {
+        const data = JSON.parse(event.data);
+        console.log("📥 WS:", data);
+
+        // 🔥 SOLO RECARGA CUANDO HAY CAMBIOS
+        if (data.type === "MEMBERSHIP_UPDATE") {
+            console.log("🔄 Recargando memberships...");
+            await loadAll();
+        }
+    };
+
+    ws.onclose = () => {
+        console.log("🔴 WS desconectado, reconectando...");
+        setTimeout(connectWebSocket, 5000);
+    };
+
+    ws.onerror = (err) => {
+        console.error("❌ WS error:", err);
+    };
+}
+
+// =====================
+// TU CÓDIGO ORIGINAL
+// =====================
 const toast = useToast();
 const auth = useAuthStore();
 
-// =====================
-// ESTADOS
-// =====================
 const memberships = ref([]);
 const partners = ref([]);
 const plans = ref([]);
-const users = ref([]); // 👈 NUEVO
+const users = ref([]);
 
 const loading = ref(false);
+const purchaseLoading = ref(false);
 const dialogVisible = ref(false);
 
 const selectedStatus = ref(null);
-
+const selectedPartner = ref(null);
+const filteredPartners = ref([]);
 const form = ref({
     partnerId: '',
     planId: ''
 });
 
 const filters = ref({
-    search: null,
+    search: '',
     planId: null,
     userId: null,
-    status: null,
+    status: 'ACTIVE',
     from: null,
     to: null
 });
@@ -45,15 +85,12 @@ const statusOptions = [
     { label: 'Futuras', value: 'FUTURE' }
 ];
 
-// =====================
-// PERMISOS
-// =====================
 const canView = computed(() => auth.can('TENANT_MEMBERSHIP_VIEW'));
 const canCreate = computed(() => auth.can('TENANT_MEMBERSHIP_CREATE'));
+const selectedSale = ref(null);
 
-// =====================
-// CARGA (CON FILTROS 🔥)
-// =====================
+const annulDialog = ref(false);
+
 async function loadAll() {
     loading.value = true;
 
@@ -67,19 +104,31 @@ async function loadAll() {
             to: filters.value.to
         };
 
-        memberships.value = await MembershipService.getAll(params);
+        const data = await MembershipService.getAll(params);
 
-        // Estos no necesitan filtros
+        memberships.value = data.sort(
+            (a, b) =>
+                new Date(b.saleDate) - new Date(a.saleDate)
+        );
+
         partners.value = await PartnerService.getAll();
         plans.value = await PlanService.getAll();
-
-        // 👇 opcional (si tienes endpoint de users)
         users.value = await UserService.getAll();
     } finally {
         loading.value = false;
     }
 }
+function searchPartners(event) {
+    console.log("buscando:", event.query);
 
+    const query = event.query.toLowerCase();
+
+    filteredPartners.value = partners.value.filter((p) =>
+        p.name.toLowerCase().includes(query)
+    );
+
+    console.log("resultados:", filteredPartners.value);
+}
 const getPDFBlob = async () => {
     const response = await MembershipService.getReportPDF(filters.value);
 
@@ -87,6 +136,7 @@ const getPDFBlob = async () => {
         type: 'application/pdf'
     });
 };
+
 const viewPDF = async () => {
     try {
         const blob = await getPDFBlob();
@@ -100,12 +150,12 @@ const viewPDF = async () => {
 };
 
 const syncStatus = (sale) => {
-    const membership = sale.commands?.find((c) => c.type === 'SYNC_MEMBERSHIP');
-    const face = sale.commands?.find((c) => c.type === 'SYNC_FACE');
+    const membership = sale.commands?.find((c) => c.type === 'SYNC_USER_FULL');
+    //const face = sale.commands?.find((c) => c.type === 'SYNC_FACE');
 
-    if (!membership || !face) return 'N/A';
+    if (!membership) return 'N/A';
 
-    const statuses = [membership.status, face.status];
+    const statuses = [membership.status];
 
     if (statuses.includes('ERROR')) return 'ERROR';
     if (statuses.includes('PENDING')) return 'PENDING';
@@ -114,20 +164,7 @@ const syncStatus = (sale) => {
 
     return 'N/A';
 };
-// const getTagSeverity = (status) => {
-//     switch (status) {
-//         case 'DONE':
-//             return 'success';
-//         case 'ERROR':
-//             return 'danger';
-//         case 'PENDING':
-//             return 'warning';
-//         case 'PROCESSING':
-//             return 'warning';
-//         default:
-//             return 'info'; // 👈 NUNCA null
-//     }
-// };
+
 const getSyncLabel = (status) => {
     switch (status) {
         case 'DONE':
@@ -142,14 +179,9 @@ const getSyncLabel = (status) => {
             return '⚪ N/A';
     }
 };
-// =====================
-// AUTO FILTRO (UX PRO)
-// =====================
+
 watch(filters, loadAll, { deep: true });
 
-// =====================
-// MODAL
-// =====================
 function openCreate() {
     form.value = {
         partnerId: '',
@@ -160,9 +192,6 @@ function openCreate() {
     dialogVisible.value = true;
 }
 
-// =====================
-// ESTADO CLIENTE
-// =====================
 watch(
     () => form.value.partnerId,
     async (val) => {
@@ -175,11 +204,33 @@ watch(
         }
     }
 );
+watch(selectedPartner, (val) => {
+    form.value.partnerId = val?.id || '';
+});
+watch(dialogVisible, (val) => {
 
-// =====================
-// PURCHASE
-// =====================
+    if (!val) {
+        resetDialog();
+    }
+});
+function resetDialog() {
+
+    form.value = {
+        partnerId: '',
+        planId: ''
+    };
+
+    selectedPartner.value = null;
+
+    selectedStatus.value = null;
+
+    filteredPartners.value = [];
+}
+
 async function purchase() {
+    if (purchaseLoading.value) return;
+
+    purchaseLoading.value = true;
     try {
         if (!form.value.partnerId || !form.value.planId) {
             toast.add({
@@ -207,11 +258,12 @@ async function purchase() {
             life: 3000
         });
     }
+    finally {
+
+        purchaseLoading.value = false;
+    }
 }
 
-// =====================
-// HELPERS
-// =====================
 function formatCurrency(value) {
     if (!value) return '0 Bs';
     return new Intl.NumberFormat('es-BO', {
@@ -219,24 +271,6 @@ function formatCurrency(value) {
         currency: 'BOB'
     }).format(value);
 }
-
-// =====================
-// BOTON RETRY
-// =====================
-// const getSeverity = (status) => {
-//     switch (status) {
-//         case 'DONE':
-//             return 'success';
-//         case 'ERROR':
-//             return 'danger';
-//         case 'PENDING':
-//             return 'warning';
-//         case 'PROCESSING':
-//             return 'warning';
-//         default:
-//             return 'N/A';
-//     }
-// };
 
 const getTagClass = (status) => {
     const map = {
@@ -251,7 +285,6 @@ const getTagClass = (status) => {
 
 const hasRetry = (sale) => {
     const relevant = sale.commands?.filter((c) => ['SYNC_MEMBERSHIP', 'SYNC_FACE'].includes(c.type));
-
     return relevant?.some((c) => c.status === 'ERROR');
 };
 
@@ -276,20 +309,81 @@ const retry = async (id) => {
         });
     }
 };
+const canAnnul = (sale) => {
 
-// =====================
-// COMMAND STATUS
-// =====================
-// const getStatus = (sale, type) => {
-//     const cmd = sale.commands?.find((c) => c.type === type);
-//     return cmd?.status || 'N/A';
-// };
+    // ya anulada
+    if (sale.status === 'ANNULLED')
+        return false;
 
+    const today = new Date();
+
+    const saleDate = new Date(sale.createdAt);
+
+    return (
+        today.getFullYear() === saleDate.getFullYear() &&
+        today.getMonth() === saleDate.getMonth() &&
+        today.getDate() === saleDate.getDate()
+    );
+};
+const confirmAnnul = (sale) => {
+
+    selectedSale.value = sale;
+
+    annulDialog.value = true;
+
+};
+const annulSale = async () => {
+
+    try {
+
+        await MembershipService
+            .annul(
+                selectedSale.value.id
+            );
+
+        toast.add({
+
+            severity: 'success',
+
+            summary: 'Éxito',
+
+            detail:
+                'Inscripción anulada'
+
+        });
+
+        annulDialog.value = false;
+
+        loadAll();
+
+    }
+
+    catch (error) {
+
+        toast.add({
+
+            severity: 'error',
+
+            summary: 'Error',
+
+            detail:
+                error.response
+                    ?.data?.message
+                || error.message
+
+        });
+
+    }
+
+};
 // =====================
 // INIT
 // =====================
 onMounted(async () => {
     await loadAll();
+
+    // 🔥 NUEVO: iniciar WebSocket
+    connectWebSocket();
 });
 </script>
 
@@ -333,7 +427,11 @@ onMounted(async () => {
         </div>
         <!-- TABLE -->
 
-        <DataTable v-if="canView" :value="memberships" :loading="loading">
+        <DataTable v-if="canView" :value="memberships" :loading="loading" paginator :rows="10"
+            :rows-per-page-options="[10, 20, 50]"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
+            current-page-report-template="Mostrando {first} a {last} de {totalRecords} ventas"
+            responsive-layout="scroll">
             <Column header="Venta">
                 <template #body="{ data }">
                     {{ formatDate(data.saleDate) }}
@@ -363,12 +461,12 @@ onMounted(async () => {
 
             <Column header="Inicio">
                 <template #body="slotProps">
-                    {{ formatDate(slotProps.data.startDate) }}
+                    {{ formatDateTimeNoTZ2(slotProps.data.startDate) }}
                 </template>
             </Column>
             <Column header="Fin">
                 <template #body="slotProps">
-                    {{ formatDate(slotProps.data.endDate) }}
+                    {{ formatDateTimeNoTZ2(slotProps.data.endDate) }}
                 </template>
             </Column>
 
@@ -381,6 +479,8 @@ onMounted(async () => {
                 <template #body="{ data }">
                     <Button v-if="hasRetry(data)" label="Retry" icon="pi pi-refresh" severity="warning"
                         @click="retry(data.id)" />
+                    <Button v-if="canAnnul(data)" icon="pi pi-times-circle" severity="danger" text rounded
+                        @click="confirmAnnul(data)" />
                 </template>
             </Column>
         </DataTable>
@@ -390,8 +490,8 @@ onMounted(async () => {
             <!-- CLIENTE -->
             <div class="field">
                 <label>Cliente</label>
-                <Dropdown v-model="form.partnerId" :options="partners" option-label="name" option-value="id"
-                    placeholder="Seleccionar cliente" class="w-full" />
+                <AutoComplete v-model="selectedPartner" :suggestions="filteredPartners" option-label="name" field="name"
+                    :min-length="1" dropdown @complete="searchPartners" />
             </div>
 
             <!-- ESTADO -->
@@ -414,8 +514,42 @@ onMounted(async () => {
             <!-- ACTIONS -->
             <div class="flex justify-content-end gap-2">
                 <Button label="Cancelar" text @click="dialogVisible = false" />
-                <Button label="Confirmar Pago" severity="success" @click="purchase" />
+                <Button label="Confirmar Pago" severity="success" :loading="purchaseLoading" :disabled="purchaseLoading"
+                    @click="purchase" />
             </div>
+        </Dialog>
+        <Dialog v-model:visible="annulDialog" header="Anular inscripción" modal :style="{ width: '30rem' }">
+
+            <div class="flex flex-column gap-2">
+
+                <span>
+                    Cliente:
+                    <b>
+                        {{ selectedSale?.customer?.fullName }}
+                    </b>
+                </span>
+
+                <span>
+                    Plan:
+                    <b>
+                        {{ selectedSale?.plan?.name }}
+                    </b>
+                </span>
+
+                <span>
+                    ¿Desea anular esta inscripción?
+                </span>
+
+            </div>
+
+            <template #footer>
+
+                <Button label="Cancelar" text @click="annulDialog = false" />
+
+                <Button label="Anular" severity="danger" @click="annulSale" />
+
+            </template>
+
         </Dialog>
     </div>
 </template>

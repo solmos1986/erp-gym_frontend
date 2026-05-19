@@ -72,7 +72,7 @@ class PartnerService {
      */
 
     static async activate(id) {
-        const { data } = await api.patch(`/partners/${id}/activate`);
+        const { data } = await api.put(`/partners/${id}/activate`);
         return data;
     }
 }

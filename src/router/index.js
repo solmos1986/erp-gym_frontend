@@ -44,16 +44,20 @@ const routes = [
         component: () => import('@/layout/AppLayout.vue'),
         beforeEnter: authGuard,
         children: [
-            // {
-            //     path: 'dashboard',
-            //     component: () => import('@/views/erp/CashDashboard.vue'),
-            //     beforeEnter: permissionGuard('ERP_TREASURY_VIEW')
-            // },
+            {
+                path: 'dashboard',
+                component: () => import('@/views/pages/pos/Dashboard.vue'),
+                beforeEnter: permissionGuard('TENANT_DASHBOARD_VIEW')
+            },
             // {
             //     path: 'products',
             //     component: () => import('@/views/erp/Products.vue'),
             //     beforeEnter: permissionGuard('ERP_PRODUCTS_VIEW')
             // },
+            {
+                path: '',
+                redirect: '/dashboard' //aqui cambiar por la vista DASHBOARD
+            },
             {
                 path: 'partners',
                 component: () => import('@/views/pages/pos/Clientes.vue'),

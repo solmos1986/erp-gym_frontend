@@ -1,4 +1,5 @@
 <script setup>
+import Toast from 'primevue/toast';
 // import { useAuthStore } from './store/auth.store';
 
 // const auth = useAuthStore();
@@ -9,6 +10,7 @@
 </script>
 
 <template>
+    <Toast />
     <router-view />
 </template>
 

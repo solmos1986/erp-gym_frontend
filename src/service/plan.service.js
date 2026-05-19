@@ -47,7 +47,7 @@ class PlanService {
      * 🔄 Activar plan (opcional - si lo implementas backend)
      */
     static async activate(id) {
-        const { data } = await api.patch(`/plan/${id}/activate`);
+        const { data } = await api.put(`/plan/${id}/activate`);
         return data;
     }
 }
