@@ -15,6 +15,7 @@ const loading = ref(false);
 
 const products = ref([]);
 const categories = ref([]);
+const materials = ref([]);
 
 const dialogVisible = ref(false);
 const editingProduct = ref(null);
@@ -34,26 +35,38 @@ async function loadProducts() {
     }
 }
 
+async function loadMaterials() {
+    materials.value = await ProductService.getAll({
+        productType: 'RAW_MATERIAL',
+        isActive: true
+    });
+}
+
 async function loadCategories() {
     categories.value = await ProductCategoryService.getAll({
         isActive: true
     });
 }
 
-function openCreate() {
+async function openCreate() {
+    await loadMaterials();
+
     editingProduct.value = null;
     dialogVisible.value = true;
 }
 
-function openEdit(product) {
+async function openEdit(product) {
     console.log('editing product');
+
+    await loadMaterials();
+
     editingProduct.value = { ...product };
     dialogVisible.value = true;
 }
 
 async function save(form) {
     try {
-        if (!form.name) {
+        if (!form.product?.name) {
             toast.add({
                 severity: 'warn',
                 summary: 'Nombre requerido',
@@ -134,7 +147,7 @@ async function activate(product) {
 }
 
 onMounted(async () => {
-    await Promise.all([loadProducts(), loadCategories()]);
+    await Promise.all([loadProducts(), loadCategories(), loadMaterials()]);
 });
 </script>
 
@@ -178,5 +191,5 @@ onMounted(async () => {
             </Column>
         </DataTable>
     </div>
-    <ProductDialog v-model:visible="dialogVisible" :editing-product="editingProduct" :categories="categories" @save="save" />
+    <ProductDialog v-model:visible="dialogVisible" :editing-product="editingProduct" :categories="categories" :materials="materials" @save="save" />
 </template>

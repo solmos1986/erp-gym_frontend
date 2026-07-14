@@ -1,6 +1,6 @@
 <script setup>
 import ToggleSwitch from 'primevue/toggleswitch';
-import { reactive, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 const visible = defineModel('visible');
 
 const emit = defineEmits(['save']);
@@ -10,14 +10,29 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
+
     editingProduct: {
         type: Object,
         default: null
+    },
+
+    // Materias primas para el AutoComplete
+    materials: {
+        type: Array,
+        default: () => []
     }
 });
 
+// =====================================================
+// FORMULARIO
+// =====================================================
+
 function defaultForm() {
     return {
+        // ===========================
+        // PRODUCTO
+        // ===========================
+
         code: '',
         barcode: '',
 
@@ -43,18 +58,103 @@ function defaultForm() {
 
         isActive: true,
 
-        bomItems: [],
-        indirectCostPercent: 0
+        // ===========================
+        // BOM
+        // ===========================
+
+        bom: {
+            name: '',
+            description: '',
+            indirectCostPercent: 10,
+
+            items: []
+        }
     };
 }
 
 const form = reactive(defaultForm());
 
+// =====================================================
+// AUTOCOMPLETE
+// =====================================================
+
+const selectedMaterial = ref(null);
+const filteredMaterials = ref([]);
+
+// =====================================================
+// WATCH EDITAR
+// =====================================================
+
 watch(
     () => props.editingProduct,
     (product) => {
-        if (product) {
-            Object.assign(form, defaultForm(), product);
+        Object.assign(form, defaultForm());
+
+        if (!product) return;
+
+        // =====================================================
+        // PRODUCTO
+        // =====================================================
+
+        form.code = product.code ?? '';
+        form.barcode = product.barcode ?? '';
+
+        form.name = product.name ?? '';
+        form.description = product.description ?? '';
+        form.imageUrl = product.imageUrl ?? '';
+
+        form.productCategoryId = product.productCategoryId ?? null;
+
+        form.productType = product.productType;
+        form.sourceType = product.sourceType;
+
+        form.unit = product.unit;
+
+        form.costPrice = Number(product.costPrice ?? 0);
+        form.salePrice = Number(product.salePrice ?? 0);
+
+        form.currentStock = Number(product.currentStock ?? 0);
+
+        form.minStock = Number(product.minStock ?? 0);
+        form.maxStock = Number(product.maxStock ?? 0);
+        form.reorderPoint = Number(product.reorderPoint ?? 0);
+
+        form.isActive = product.isActive;
+
+        // =====================================================
+        // BOM
+        // =====================================================
+
+        form.bom = {
+            name: '',
+            description: '',
+            indirectCostPercent: 10,
+            items: []
+        };
+
+        if (product.bom?.length) {
+            const currentBom = product.bom[0];
+
+            form.bom.name = currentBom.name ?? '';
+            form.bom.description = currentBom.description ?? '';
+
+            form.bom.items = currentBom.items.map((item) => ({
+                materialId: item.material.id,
+
+                productCode: item.material.code,
+
+                productName: item.material.name,
+
+                unit: item.material.unit,
+
+                unitCost: Number(item.material.costPrice ?? 0),
+
+                quantity: Number(item.quantity),
+
+                wastePercent: Number(item.wastePercent ?? 0),
+
+                notes: item.notes ?? ''
+            }));
         }
     },
     {
@@ -62,14 +162,25 @@ watch(
     }
 );
 
+// =====================================================
+// LIMPIAR FORMULARIO
+// =====================================================
+
 watch(
     () => visible.value,
     (show) => {
         if (!show) {
             Object.assign(form, defaultForm());
+
+            selectedMaterial.value = null;
+            filteredMaterials.value = [];
         }
     }
 );
+
+// =====================================================
+// CATÁLOGOS
+// =====================================================
 
 const productTypes = [
     {
@@ -117,13 +228,149 @@ const units = [
     { label: 'Rollo', value: 'ROLL' },
     { label: 'Docena', value: 'DOZEN' }
 ];
+// =====================================================
+// AUTOCOMPLETE
+// =====================================================
+
+function searchMaterials(event) {
+    const query = event.query.toLowerCase();
+
+    filteredMaterials.value = props.materials.filter((material) => {
+        return material.name.toLowerCase().includes(query) || material.code?.toLowerCase().includes(query) || material.barcode?.toLowerCase().includes(query);
+    });
+}
+
+// =====================================================
+// AGREGAR MATERIAL
+// =====================================================
+
+function addItem() {
+    if (!selectedMaterial.value) return;
+
+    const exists = form.bom.items.find((item) => item.materialId === selectedMaterial.value.id);
+
+    if (exists) {
+        selectedMaterial.value = null;
+        return;
+    }
+
+    form.bom.items.push({
+        materialId: selectedMaterial.value.id,
+
+        productCode: selectedMaterial.value.code,
+
+        productName: selectedMaterial.value.name,
+
+        unit: selectedMaterial.value.unit,
+
+        unitCost: Number(selectedMaterial.value.costPrice ?? 0),
+
+        quantity: 1,
+
+        wastePercent: 0,
+
+        notes: ''
+    });
+
+    selectedMaterial.value = null;
+}
+
+// =====================================================
+// ELIMINAR MATERIAL
+// =====================================================
+
+function removeItem(index) {
+    form.bom.items.splice(index, 1);
+}
+
+// =====================================================
+// COSTO PRODUCCIÓN
+// =====================================================
+
+const productionCost = computed(() => {
+    return form.bom.items.reduce((total, item) => {
+        return total + item.quantity * item.unitCost;
+    }, 0);
+});
+
+// =====================================================
+// COSTO TOTAL
+// =====================================================
+
+const totalProductionCost = computed(() => {
+    return productionCost.value * (1 + form.bom.indirectCostPercent / 100);
+});
+// =====================================================
+// GUARDAR PRODUCTO
+// =====================================================
 
 function saveProduct() {
+    // ==========================
+    // PRODUCTO
+    // ==========================
+
+    const product = {
+        code: form.code,
+        barcode: form.barcode,
+
+        name: form.name,
+        description: form.description,
+        imageUrl: form.imageUrl,
+
+        productCategoryId: form.productCategoryId,
+
+        productType: form.productType,
+        sourceType: form.sourceType,
+
+        unit: form.unit,
+
+        costPrice: form.costPrice,
+        salePrice: form.salePrice,
+
+        currentStock: form.currentStock,
+
+        minStock: form.minStock,
+        maxStock: form.maxStock,
+        reorderPoint: form.reorderPoint,
+
+        isActive: form.isActive
+    };
+
+    // ==========================
+    // BOM
+    // ==========================
+
+    let bom = null;
+
+    const requiresBom = form.productType === 'FINISHED_PRODUCT' && (form.sourceType === 'PRODUCTION' || form.sourceType === 'BOTH');
+
+    if (requiresBom) {
+        bom = {
+            name: form.bom.name?.trim() || null,
+
+            description: form.bom.description?.trim() || null,
+
+            indirectCostPercent: form.bom.indirectCostPercent,
+
+            items: form.bom.items.map((item) => ({
+                materialId: item.materialId,
+
+                quantity: Number(item.quantity),
+
+                wastePercent: Number(item.wastePercent ?? 0),
+
+                notes: item.notes?.trim() || null
+            }))
+        };
+    }
+
     emit('save', {
-        ...form
+        product,
+        bom
     });
 }
 </script>
+
 <template>
     <Dialog v-model:visible="visible" modal :style="{ width: '95vw', maxWidth: '1700px' }" :header="props.editingProduct ? 'Editar Producto' : 'Nuevo Producto'" class="product-dialog">
         <div class="flex flex-col md:flex-row gap-8">
@@ -247,115 +494,268 @@ function saveProduct() {
 
             <div class="md:w-1/2">
                 <div class="card flex flex-col gap-6">
-                    <div>
-                        <div class="font-semibold text-2xl">Inventario y Precios</div>
-                        <div class="text-500 mt-2">Configura los niveles de inventario y los precios del producto.</div>
-                    </div>
+                    <div v-if="form.sourceType === 'PURCHASE'">
+                        <div>
+                            <div class="font-semibold text-2xl">Inventario y Precios</div>
+                            <div class="text-500 mt-2">Configura los niveles de inventario y los precios del producto.</div>
+                        </div>
 
-                    <!-- ===================================================== -->
-                    <!-- INVENTARIO -->
-                    <!-- ===================================================== -->
+                        <!-- ===================================================== -->
+                        <!-- INVENTARIO -->
+                        <!-- ===================================================== -->
 
-                    <div>
-                        <div class="font-semibold text-xl mb-4">Inventario</div>
+                        <div>
+                            <div class="font-semibold text-xl mb-4">Inventario</div>
 
-                        <div class="flex flex-wrap gap-4">
-                            <div class="flex flex-col grow basis-0 gap-2">
-                                <label>Stock Mínimo</label>
+                            <div class="flex flex-wrap gap-4">
+                                <div class="flex flex-col grow basis-0 gap-2">
+                                    <label>Stock Mínimo</label>
 
-                                <InputNumber v-model="form.minStock" class="w-full" :min="0" />
+                                    <InputNumber v-model="form.minStock" class="w-full" :min="0" />
+                                </div>
+
+                                <div class="flex flex-col grow basis-0 gap-2">
+                                    <label>Stock Máximo</label>
+
+                                    <InputNumber v-model="form.maxStock" class="w-full" :min="0" />
+                                </div>
                             </div>
 
-                            <div class="flex flex-col grow basis-0 gap-2">
-                                <label>Stock Máximo</label>
+                            <div class="flex flex-wrap gap-4 mt-4">
+                                <div class="flex flex-col grow basis-0 gap-2">
+                                    <label>Punto de Reposición</label>
 
-                                <InputNumber v-model="form.maxStock" class="w-full" :min="0" />
+                                    <InputNumber v-model="form.reorderPoint" class="w-full" :min="0" />
+
+                                    <small class="text-500">Nivel para generar alerta de reposición.</small>
+                                </div>
+
+                                <div class="flex flex-col grow basis-0 gap-2">
+                                    <label>Stock Actual</label>
+
+                                    <InputNumber v-model="form.currentStock" class="w-full" disabled />
+
+                                    <small class="text-500">Calculado automáticamente.</small>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap gap-4 mt-4">
-                            <div class="flex flex-col grow basis-0 gap-2">
-                                <label>Punto de Reposición</label>
+                        <!-- ===================================================== -->
+                        <!-- COSTOS -->
+                        <!-- ===================================================== -->
 
-                                <InputNumber v-model="form.reorderPoint" class="w-full" :min="0" />
+                        <div>
+                            <div class="font-semibold text-xl mb-4">Costos y Precios</div>
 
-                                <small class="text-500">Nivel para generar alerta de reposición.</small>
-                            </div>
+                            <div class="flex flex-wrap gap-4">
+                                <div class="flex flex-col grow basis-0 gap-2">
+                                    <label>Costo</label>
 
-                            <div class="flex flex-col grow basis-0 gap-2">
-                                <label>Stock Actual</label>
+                                    <InputNumber v-model="form.costPrice" class="w-full" mode="currency" currency="BOB" locale="es-BO" disabled />
 
-                                <InputNumber v-model="form.currentStock" class="w-full" disabled />
+                                    <small class="text-500">Se actualiza automáticamente desde Compras y Producción.</small>
+                                </div>
 
-                                <small class="text-500">Calculado automáticamente.</small>
-                            </div>
-                        </div>
-                    </div>
+                                <div class="flex flex-col grow basis-0 gap-2">
+                                    <label>Precio de Venta *</label>
 
-                    <!-- ===================================================== -->
-                    <!-- COSTOS -->
-                    <!-- ===================================================== -->
+                                    <InputNumber v-model="form.salePrice" class="w-full" mode="currency" currency="BOB" locale="es-BO" :min="0" />
 
-                    <div>
-                        <div class="font-semibold text-xl mb-4">Costos y Precios</div>
-
-                        <div class="flex flex-wrap gap-4">
-                            <div class="flex flex-col grow basis-0 gap-2">
-                                <label>Costo</label>
-
-                                <InputNumber v-model="form.costPrice" class="w-full" mode="currency" currency="BOB" locale="es-BO" disabled />
-
-                                <small class="text-500">Se actualiza automáticamente desde Compras y Producción.</small>
-                            </div>
-
-                            <div class="flex flex-col grow basis-0 gap-2">
-                                <label>Precio de Venta *</label>
-
-                                <InputNumber v-model="form.salePrice" class="w-full" mode="currency" currency="BOB" locale="es-BO" :min="0" />
-
-                                <small class="text-500">Precio utilizado en ventas.</small>
+                                    <small class="text-500">Precio utilizado en ventas.</small>
+                                </div>
                             </div>
                         </div>
+
+                        <Message severity="info" :closable="false">
+                            <strong>Importante</strong>
+
+                            <br />
+
+                            El stock y el costo serán administrados automáticamente mediante los movimientos de inventario.
+                        </Message>
                     </div>
 
-                    <Message severity="info" :closable="false">
-                        <strong>Importante</strong>
-
-                        <br />
-
-                        El stock y el costo serán administrados automáticamente mediante los movimientos de inventario.
-                    </Message>
                     <!-- ===================================================== -->
                     <!-- PRODUCCIÓN (BOM) -->
                     <!-- ===================================================== -->
 
-                    <div v-if="form.productType !== 'SERVICE' && (form.sourceType === 'PRODUCTION' || form.sourceType === 'BOTH')">
-                        <div class="font-semibold text-2xl mb-4">Lista de Materiales (BOM)</div>
+                    <div v-if="form.productType === 'FINISHED_PRODUCT' && (form.sourceType === 'PRODUCTION' || form.sourceType === 'BOTH')">
+                        <Message severity="success" :closable="false">
+                            <div class="flex align-items-start gap-3">
+                                <i class="pi pi-box text-2xl"></i>
 
-                        <Message severity="warn" :closable="false">
-                            <strong>Módulo en construcción</strong>
+                                <div>
+                                    <div class="font-semibold mt-1">Abastecimiento: PRODUCCIÓN</div>
 
-                            <br />
-
-                            Aquí se configurará la receta o Lista de Materiales (BOM) utilizada por Producción.
+                                    <div class="mt-2">Este producto será fabricado utilizando las materias primas definidas en esta Lista de Materiales (BOM).</div>
+                                </div>
+                            </div>
                         </Message>
 
-                        <!--
-                                Próximamente:
+                        <div class="mt-4">
+                            <div class="font-semibold text-2xl">Lista de Materiales (BOM)</div>
 
-                                DataTable de Materias Primas
+                            <div class="text-500 mt-2">Agregue las materias primas necesarias para fabricar este producto.</div>
+                        </div>
 
-                                + Agregar Material
-                                + Cantidad
-                                + Unidad
-                                + Merma
-                                + Costo
-                                + Rendimiento
-                                + Costos Indirectos
+                        <!-- =====================================================-->
+                        <!-- DATOS DEL BOM -->
+                        <!-- ===================================================== -->
 
-                            -->
+                        <!-- <div class="flex flex-wrap gap-4 mt-5">
+                            <div class="flex flex-col grow basis-0 gap-2">
+                                <label>Nombre del BOM</label>
+
+                                <InputText v-model="form.bom.name" placeholder="Ej. Receta Principal" />
+                            </div>
+
+                            <div class="flex flex-col grow basis-0 gap-2">
+                                <label>Descripción</label>
+
+                                <InputText v-model="form.bom.description" placeholder="Opcional" />
+                            </div>
+                        </div>  -->
+
+                        <!-- ===================================================== -->
+                        <!-- AGREGAR MATERIA PRIMA -->
+                        <!-- ===================================================== -->
+
+                        <div class="flex align-items-end gap-3 mt-5 mb-5">
+                            <div class="flex-1">
+                                <label class="block mb-2">Buscar Materia Prima</label>
+
+                                <AutoComplete v-model="selectedMaterial" :suggestions="filteredMaterials" option-label="name" dropdown fluid placeholder="Buscar materia prima..." @complete="searchMaterials" />
+                            </div>
+
+                            <Button label="Agregar" icon="pi pi-plus" severity="success" @click="addItem" />
+                        </div>
+                        <!-- ===================================================== -->
+                        <!-- MATERIAS PRIMAS -->
+                        <!-- ===================================================== -->
+
+                        <DataTable :value="form.bom.items" striped-rows responsive-layout="scroll" class="mt-3" empty-message="No existen materias primas agregadas.">
+                            <!-- Materia Prima -->
+
+                            <Column header="Materia Prima" style="width: 40%">
+                                <template #body="{ data }">
+                                    <div class="flex flex-column">
+                                        <span class="font-medium">
+                                            {{ data.productName }}
+                                        </span>
+
+                                        <small class="text-500">
+                                            {{ data.productCode }}
+                                        </small>
+                                    </div>
+                                </template>
+                            </Column>
+
+                            <!-- Unidad -->
+
+                            <Column header="Unidad" style="width: 10%">
+                                <template #body="{ data }">
+                                    {{ data.unit }}
+                                </template>
+                            </Column>
+
+                            <!-- Cantidad -->
+
+                            <Column header="Cantidad" style="width: 15%">
+                                <template #body="{ data }">
+                                    <InputNumber v-model="data.quantity" :min="0.01" :min-fraction-digits="2" :max-fraction-digits="4" input-class="text-center" fluid />
+                                </template>
+                            </Column>
+
+                            <!-- Costo Actual -->
+
+                            <Column header="Costo Actual" style="width: 15%">
+                                <template #body="{ data }">
+                                    <span class="font-medium">Bs. {{ Number(data.unitCost ?? 0).toFixed(2) }}</span>
+                                </template>
+                            </Column>
+
+                            <!-- Subtotal -->
+
+                            <Column header="Subtotal" style="width: 15%">
+                                <template #body="{ data }">
+                                    <strong class="text-green-600">
+                                        Bs.
+                                        {{ (Number(data.quantity) * Number(data.unitCost)).toFixed(2) }}
+                                    </strong>
+                                </template>
+                            </Column>
+
+                            <!-- Acciones -->
+
+                            <Column style="width: 70px">
+                                <template #body="{ index }">
+                                    <Button icon="pi pi-trash" severity="danger" text rounded @click="removeItem(index)" />
+                                </template>
+                            </Column>
+                        </DataTable>
+                        <!-- ===================================================== -->
+                        <!-- RESUMEN DE COSTOS -->
+                        <!-- ===================================================== -->
+
+                        <div class="flex flex-wrap justify-between gap-4 mt-4">
+                            <div class="flex-1 flex justify-center align-center">
+                                <div class="cost-box">
+                                    <span class="label">Costo de Producción</span>
+                                    <br />
+                                    <span class="text-green-600 text-4xl font-bold">Bs. {{ productionCost.toFixed(2) }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex-1 flex justify-center align-center">
+                                <div class="cost-box">
+                                    <span class="label text-500">Gastos Indirectos (%)</span>
+                                    <br />
+
+                                    <InputNumber v-model="form.bom.indirectCostPercent" suffix="%" :min="0" :max="100" fluid />
+                                </div>
+                            </div>
+
+                            <div class="flex-1 flex justify-center align-center">
+                                <div class="cost-box">
+                                    <span class="label text-500">Costo Total</span>
+                                    <br />
+                                    <span class="text-900 text-4xl font-bold">Bs. {{ totalProductionCost.toFixed(2) }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ===================================================== -->
+                        <!-- INFORMACIÓN -->
+                        <!-- ===================================================== -->
+
+                        <Message severity="info" :closable="false" class="mt-4">
+                            <div class="flex align-items-start gap-3">
+                                <i class="pi pi-info-circle text-2xl"></i>
+
+                                <div>
+                                    <div class="font-semibold">Información sobre los costos</div>
+
+                                    <div class="mt-2">
+                                        El costo de producción se calcula utilizando el
+                                        <strong>costo actual</strong>
+                                        de cada materia prima.
+                                    </div>
+
+                                    <div class="mt-2">
+                                        Los costos son actualizados automáticamente mediante:
+
+                                        <ul class="mt-2 ml-3">
+                                            <li>Inventario Inicial</li>
+
+                                            <li>Compras</li>
+
+                                            <li>Producción</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </Message>
                     </div>
-
                     <!-- ===================================================== -->
                     <!-- SERVICIOS -->
                     <!-- ===================================================== -->
