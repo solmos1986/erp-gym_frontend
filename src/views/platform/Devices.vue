@@ -49,11 +49,10 @@ const canDelete = computed(() => auth.can('TENANT_DEVICES_DELETE'));
 // CARGA
 // =====================
 async function loadAll() {
-
     loading.value = true;
     try {
-        console.log("download agent - auth:", auth);
-        console.log("auth.user:", auth.user);
+        console.log('download agent - auth:', auth);
+        console.log('auth.user:', auth.user);
         devices.value = await DeviceService.getAll();
         branches.value = await BranchService.getAll();
         console.log('branches cargados:', branches.value);
@@ -163,8 +162,6 @@ async function remove(id) {
     }
 }
 
-
-
 // =====================
 // INIT
 // =====================
@@ -174,22 +171,21 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="card">
+    <div>
         <!-- TOOLBAR -->
+
+        <!-- TITLE -->
+        <div class="flex justify-content-between mb-1">
+            <h3>Dispositivos</h3>
+        </div>
         <Toolbar class="mb-6">
             <template #start>
-                <Button v-if="canCreate" label="New Device" icon="pi pi-plus" severity="secondary"
-                    @click="openCreate" />
+                <Button v-if="canCreate" label="New Device" icon="pi pi-plus" severity="secondary" @click="openCreate" />
             </template>
         </Toolbar>
 
-        <!-- TITLE -->
-        <div class="flex justify-content-between mb-3">
-            <h3>Dispositivos</h3>
-        </div>
-
         <!-- TABLE -->
-        <DataTable v-if="canView" :value="devices" :loading="loading">
+        <DataTable v-if="canView" :value="devices" :loading="loading" paginator :rows="10" :rows-per-page-options="[10, 20, 50]" striped-rows responsive-layout="scroll">
             <Column field="name" header="Nombre" />
             <Column field="ip" header="IP" />
 
@@ -203,8 +199,7 @@ onMounted(async () => {
             <Column field="deviceType" header="Tipo" />
             <Column field="status" header="Estado">
                 <template #body="{ data }">
-                    <span
-                        :class="['px-2 py-1 rounded text-xs font-semibold', data.status === 'CONNECTED' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600']">
+                    <span :class="['px-2 py-1 rounded text-xs font-semibold', data.status === 'CONNECTED' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600']">
                         {{ formatStatus(data.status) }}
                     </span>
                 </template>
@@ -246,8 +241,7 @@ onMounted(async () => {
 
             <div class="field">
                 <label>Tipo</label>
-                <Dropdown v-model="form.deviceType" :options="['ACCESS_CONTROL', 'CAMERA', 'BIOMETRIC']"
-                    class="w-full" />
+                <Dropdown v-model="form.deviceType" :options="['ACCESS_CONTROL', 'CAMERA', 'BIOMETRIC']" class="w-full" />
             </div>
 
             <div class="field">
@@ -257,8 +251,7 @@ onMounted(async () => {
 
             <div class="field">
                 <label>Sucursal</label>
-                <Dropdown v-model="form.branchId" :options="branches" option-label="name" option-value="id"
-                    placeholder="Seleccionar sucursal" class="w-full" />
+                <Dropdown v-model="form.branchId" :options="branches" option-label="name" option-value="id" placeholder="Seleccionar sucursal" class="w-full" />
             </div>
 
             <div class="flex justify-content-end gap-2">

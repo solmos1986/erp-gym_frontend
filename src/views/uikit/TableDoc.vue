@@ -168,8 +168,8 @@ function calculateCustomerTotal(name) {
                     </IconField>
                 </div>
             </template>
-            <template #empty> No customers found. </template>
-            <template #loading> Loading customers data. Please wait. </template>
+            <template #empty>No customers found.</template>
+            <template #loading>Loading customers data. Please wait.</template>
             <Column field="name" header="Name" style="min-width: 12rem">
                 <template #body="{ data }">
                     {{ data.name }}
@@ -258,7 +258,7 @@ function calculateCustomerTotal(name) {
                     <i class="pi" :class="{ 'pi-check-circle text-green-500 ': data.verified, 'pi-times-circle text-red-500': !data.verified }"></i>
                 </template>
                 <template #filter="{ filterModel }">
-                    <label for="verified-filter" class="font-bold"> Verified </label>
+                    <label for="verified-filter" class="font-bold">Verified</label>
                     <Checkbox v-model="filterModel.value" :indeterminate="filterModel.value === null" binary inputId="verified-filter" />
                 </template>
             </Column>

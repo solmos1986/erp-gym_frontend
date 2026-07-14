@@ -213,7 +213,7 @@ onMounted(loadUsers); // Cargar usuarios al montar el componente
                 <MultiSelect v-model="form.roleIds" :options="allroles" optionLabel="name" optionValue="id" class="w-full" placeholder="Seleccionar roles" />
             </div>
             <div>
-                <label> Password </label>
+                <label>Password</label>
                 <!-- 🔥 AQUÍ ESTABA EL ERROR -->
                 <Password id="password" v-model="form.password" placeholder="Password" :toggleMask="true" class="mb-4" fluid :feedback="false"></Password>
             </div>

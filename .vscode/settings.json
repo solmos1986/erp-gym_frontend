@@ -1,9 +1,7 @@
 {
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit",
-        "source.organizeImports": "explicit",
-
-
+        "source.organizeImports": "explicit"
     },
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "[javascript]": {
@@ -11,7 +9,7 @@
         "editor.formatOnSave": true
     },
     "[vue]": {
-        "editor.defaultFormatter": "Vue.volar",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.formatOnSave": true
     },
     "[typescript]": {
@@ -19,13 +17,13 @@
         "editor.formatOnSave": true
     },
     "[json]": {
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
 
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+        },
 
-  "eslint.format.enable": false
-}
+        "eslint.format.enable": false
+    }
 }

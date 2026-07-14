@@ -99,7 +99,10 @@ async function confirmPurchase() {
     <Dialog :visible="visible" modal header="Confirmar Compra" style="width: 600px" @update:visible="emit('close')">
         <div v-if="purchase">
             <div class="mb-3">
-                <div><b>Proveedor:</b> {{ purchase.partner?.name }}</div>
+                <div>
+                    <b>Proveedor:</b>
+                    {{ purchase.partner?.name }}
+                </div>
                 <div class="text-lg font-bold">Total: Bs {{ purchase.total }}</div>
             </div>
 

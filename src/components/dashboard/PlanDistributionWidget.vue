@@ -5,145 +5,72 @@ import DashboardService from '@/service/dashboard.service';
 
 import { useLayout } from '@/layout/composables/layout';
 
-import {
-    onMounted,
-    ref,
-    watch
-} from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
-const {
-    getPrimary,
-    getSurface,
-    isDarkTheme
-} = useLayout();
+const { getPrimary, getSurface, isDarkTheme } = useLayout();
 
 const chartData = ref();
 
 const chartOptions = ref();
 
-const loadChart =
-    async () => {
+const loadChart = async () => {
+    const data = await DashboardService.getPlanDistribution();
 
-        const data =
-            await DashboardService
-                .getPlanDistribution();
+    const documentStyle = getComputedStyle(document.documentElement);
 
-        const documentStyle =
-            getComputedStyle(
-                document.documentElement
-            );
+    const textColor = documentStyle.getPropertyValue('--text-color');
 
-        const textColor =
-            documentStyle
-                .getPropertyValue(
-                    '--text-color'
-                );
+    chartData.value = {
+        labels: data.map((x) => x.name),
 
-        chartData.value = {
+        datasets: [
+            {
+                data: data.map((x) => x.value),
 
-            labels:
+                backgroundColor: [
+                    documentStyle.getPropertyValue('--p-indigo-500'),
 
-                data.map(
-                    x => x.name
-                ),
+                    documentStyle.getPropertyValue('--p-purple-500'),
 
-            datasets: [
+                    documentStyle.getPropertyValue('--p-teal-500'),
 
-                {
+                    documentStyle.getPropertyValue('--p-orange-500'),
 
-                    data:
+                    documentStyle.getPropertyValue('--p-pink-500')
+                ],
 
-                        data.map(
-                            x => x.value
-                        ),
+                hoverBackgroundColor: [
+                    documentStyle.getPropertyValue('--p-indigo-400'),
 
-                    backgroundColor: [
+                    documentStyle.getPropertyValue('--p-purple-400'),
 
-                        documentStyle
-                            .getPropertyValue(
-                                '--p-indigo-500'
-                            ),
+                    documentStyle.getPropertyValue('--p-teal-400'),
 
-                        documentStyle
-                            .getPropertyValue(
-                                '--p-purple-500'
-                            ),
+                    documentStyle.getPropertyValue('--p-orange-400'),
 
-                        documentStyle
-                            .getPropertyValue(
-                                '--p-teal-500'
-                            ),
-
-                        documentStyle
-                            .getPropertyValue(
-                                '--p-orange-500'
-                            ),
-
-                        documentStyle
-                            .getPropertyValue(
-                                '--p-pink-500'
-                            )
-                    ],
-
-                    hoverBackgroundColor: [
-
-                        documentStyle
-                            .getPropertyValue(
-                                '--p-indigo-400'
-                            ),
-
-                        documentStyle
-                            .getPropertyValue(
-                                '--p-purple-400'
-                            ),
-
-                        documentStyle
-                            .getPropertyValue(
-                                '--p-teal-400'
-                            ),
-
-                        documentStyle
-                            .getPropertyValue(
-                                '--p-orange-400'
-                            ),
-
-                        documentStyle
-                            .getPropertyValue(
-                                '--p-pink-400'
-                            )
-                    ]
-                }
-            ]
-        };
-
-        chartOptions.value = {
-
-            plugins: {
-
-                legend: {
-
-                    position:
-                        'top',
-
-                    labels: {
-
-                        usePointStyle:
-                            true,
-
-                        color:
-                            textColor
-                    }
-                }
+                    documentStyle.getPropertyValue('--p-pink-400')
+                ]
             }
-        };
+        ]
     };
 
+    chartOptions.value = {
+        plugins: {
+            legend: {
+                position: 'top',
+
+                labels: {
+                    usePointStyle: true,
+
+                    color: textColor
+                }
+            }
+        }
+    };
+};
+
 watch(
-    [
-        getPrimary,
-        getSurface,
-        isDarkTheme
-    ],
+    [getPrimary, getSurface, isDarkTheme],
 
     loadChart,
 
@@ -152,36 +79,13 @@ watch(
     }
 );
 
-onMounted(
-    loadChart
-);
-
+onMounted(loadChart);
 </script>
 
 <template>
+    <div class="card flex flex-col items-center">
+        <div class="font-semibold text-xl mb-4">Distribución por planes</div>
 
-    <div class="
-card
-flex
-flex-col
-items-center
-">
-
-        <div class="
-font-semibold
-text-xl
-mb-4
-">
-
-            Distribución
-            por planes
-
-        </div>
-
-        <Chart type="doughnut" :data="chartData
-            " :options="chartOptions
-    " />
-
+        <Chart type="doughnut" :data="chartData" :options="chartOptions" />
     </div>
-
 </template>

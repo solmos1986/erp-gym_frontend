@@ -89,7 +89,6 @@ async function saveBranch() {
 
         // 🔥 recargar empresas
         emit('reload');
-
     } catch (e) {
         toast.add({
             severity: 'error',
@@ -102,28 +101,25 @@ async function saveBranch() {
 // 📥 AGENT
 // =========================
 async function downloadAgent(branch) {
-    alert("Se descargarán 2 archivos: agent.exe y config.local.json");
+    alert('Se descargarán 2 archivos: agent.exe y config.local.json');
 
-    const exeLink = document.createElement("a");
-    exeLink.href = "https://apigymcloud.aplus-security.com/agent/download-exe";
-    exeLink.download = "agent.exe";
+    const exeLink = document.createElement('a');
+    exeLink.href = 'https://apigymcloud.aplus-security.com/agent/download-exe';
+    exeLink.download = 'agent.exe';
     exeLink.click();
 
-    const response = await fetch(
-        `https://apigymcloud.aplus-security.com/agent/download/${branch.id}`,
-        {
-            headers: {
-                Authorization: `Bearer ${auth.token}`
-            }
+    const response = await fetch(`https://apigymcloud.aplus-security.com/agent/download/${branch.id}`, {
+        headers: {
+            Authorization: `Bearer ${auth.token}`
         }
-    );
+    });
 
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
 
-    const configLink = document.createElement("a");
+    const configLink = document.createElement('a');
     configLink.href = url;
-    configLink.download = "config.local.json";
+    configLink.download = 'config.local.json';
     configLink.click();
 }
 </script>
@@ -155,12 +151,10 @@ async function downloadAgent(branch) {
                 <h5>Sucursales</h5>
             </template>
             <template #end>
-                <Button v-if="canUpdate" label="Nueva Sucursal" icon="pi pi-plus" size="small"
-                    @click="openCreateBranch" />
+                <Button v-if="canUpdate" label="Nueva Sucursal" icon="pi pi-plus" size="small" @click="openCreateBranch" />
             </template>
         </Toolbar>
         <!-- HEADER -->
-
 
         <!-- TABLA -->
         <DataTable :value="company.branches">
@@ -169,15 +163,14 @@ async function downloadAgent(branch) {
             <Column header="Acciones">
                 <template #body="slotProps">
                     <div class="flex gap-2">
-                        <Button type="button" icon="pi pi-download" label="Agent"
-                            @click.stop="downloadAgent(slotProps.data)" />
+                        <Button type="button" icon="pi pi-download" label="Agent" @click.stop="downloadAgent(slotProps.data)" />
                     </div>
                 </template>
             </Column>
         </DataTable>
 
         <!-- DIALOG -->
-        <Dialog v-model:visible="dialogVisible" header="Nueva Sucursal" modal style="width: 300px;">
+        <Dialog v-model:visible="dialogVisible" header="Nueva Sucursal" modal style="width: 300px">
             <div class="field mb-3">
                 <label>Nombre</label>
                 <InputText v-model="form.name" class="w-full" />
@@ -188,6 +181,5 @@ async function downloadAgent(branch) {
                 <Button label="Guardar" @click="saveBranch" />
             </div>
         </Dialog>
-
     </div>
 </template>

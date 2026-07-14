@@ -426,7 +426,7 @@ function onContextRightClick(event) {
         <div class="font-semibold text-xl mb-4">Menubar</div>
         <Menubar :model="nestedMenuitems">
             <template #end>
-                <IconField iconPosition="left">
+                <IconField icon-position="left">
                     <InputIcon class="pi pi-search" />
                     <InputText type="text" placeholder="Search" />
                 </IconField>
@@ -442,14 +442,15 @@ function onContextRightClick(event) {
     <div class="flex flex-col md:flex-row gap-8">
         <div class="md:w-1/2">
             <div class="card">
-                <div class="font-semibold text-xl mb-4">Steps</div>
-                <Stepper value="1">
-                    <StepList>
-                        <Step value="1">Header I</Step>
-                        <Step value="2">Header II</Step>
-                        <Step value="3">Header III</Step>
-                    </StepList>
-                </Stepper>
+                <div style="border: 1px solid red; padding: 20px">
+                    <Stepper value="1">
+                        <StepList>
+                            <Step value="1">Uno</Step>
+                            <Step value="2">Dos</Step>
+                            <Step value="3">Tres</Step>
+                        </StepList>
+                    </Stepper>
+                </div>
             </div>
         </div>
         <div class="md:w-1/2">
@@ -483,7 +484,7 @@ function onContextRightClick(event) {
             <div class="card">
                 <div class="font-semibold text-xl mb-4">Overlay Menu</div>
                 <Menu ref="menu" :model="overlayMenuItems" :popup="true" />
-                <Button type="button" label="Options" icon="pi pi-angle-down" @click="toggleMenu" style="width: auto" />
+                <Button type="button" label="Options" icon="pi pi-angle-down" style="width: auto" @click="toggleMenu" />
             </div>
 
             <div class="card" @contextmenu="onContextRightClick">

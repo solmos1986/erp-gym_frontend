@@ -10,7 +10,7 @@
                     <i class="pi pi-shopping-cart text-blue-500 !text-xl"></i>
                 </div>
             </div>
-            <span class="text-primary font-medium">24 new </span>
+            <span class="text-primary font-medium">24 new</span>
             <span class="text-muted-color">since last visit</span>
         </div>
     </div>
@@ -25,7 +25,7 @@
                     <i class="pi pi-dollar text-orange-500 !text-xl"></i>
                 </div>
             </div>
-            <span class="text-primary font-medium">%52+ </span>
+            <span class="text-primary font-medium">%52+</span>
             <span class="text-muted-color">since last week</span>
         </div>
     </div>
@@ -40,7 +40,7 @@
                     <i class="pi pi-users text-cyan-500 !text-xl"></i>
                 </div>
             </div>
-            <span class="text-primary font-medium">520 </span>
+            <span class="text-primary font-medium">520</span>
             <span class="text-muted-color">newly registered</span>
         </div>
     </div>
@@ -55,7 +55,7 @@
                     <i class="pi pi-comment text-purple-500 !text-xl"></i>
                 </div>
             </div>
-            <span class="text-primary font-medium">85 </span>
+            <span class="text-primary font-medium">85</span>
             <span class="text-muted-color">responded</span>
         </div>
     </div>

@@ -322,7 +322,7 @@ async function searchCashRegister(event) {
                     <span v-if="data.saleDate">
                         {{ new Date(data.saleDate).toLocaleString() }}
                     </span>
-                    <span v-else class="text-gray-400 italic"> {{ new Date(data.createdAt).toLocaleString() }} (borrador) </span>
+                    <span v-else class="text-gray-400 italic">{{ new Date(data.createdAt).toLocaleString() }} (borrador)</span>
                 </template>
             </Column>
 
@@ -333,7 +333,7 @@ async function searchCashRegister(event) {
             </Column>
 
             <Column header="Total">
-                <template #body="{ data }"> Bs {{ data.total }} </template>
+                <template #body="{ data }">Bs {{ data.total }}</template>
             </Column>
 
             <Column field="status" header="Estado">
@@ -360,11 +360,11 @@ async function searchCashRegister(event) {
                 </template>
             </Column>
             <Column header="Pagado">
-                <template #body="{ data }"> Bs {{ data.paymentMethods ? data.paymentMethods.reduce((s, p) => s + Number(p.amount), 0) : 0 }} </template>
+                <template #body="{ data }">Bs {{ data.paymentMethods ? data.paymentMethods.reduce((s, p) => s + Number(p.amount), 0) : 0 }}</template>
             </Column>
             <Column header="Deuda">
                 <template #body="{ data }">
-                    <span v-if="data.status === 'PARTIAL'" class="text-red-600 font-bold"> Bs {{ data.total - data.paymentMethods.reduce((s, p) => s + Number(p.amount), 0) }} </span>
+                    <span v-if="data.status === 'PARTIAL'" class="text-red-600 font-bold">Bs {{ data.total - data.paymentMethods.reduce((s, p) => s + Number(p.amount), 0) }}</span>
                     <span v-else>0</span>
                 </template>
             </Column>

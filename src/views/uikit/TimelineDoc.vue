@@ -126,7 +126,7 @@ const horizontalEvents = ref(['2020', '2021', '2022', '2023']);
 
                 <div class="font-semibold mt-4 mb-2">Alternate Align</div>
                 <Timeline :value="horizontalEvents" layout="horizontal" align="alternate">
-                    <template #opposite> &nbsp; </template>
+                    <template #opposite>&nbsp;</template>
                     <template #content="slotProps">
                         {{ slotProps.item }}
                     </template>

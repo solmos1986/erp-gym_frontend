@@ -1,6 +1,6 @@
 import api from '../service/api';
 
-const API_URL = '/tenant-roles'; // Aquí pon la URL base de tu API
+const API_URL = '/roles'; // Aquí pon la URL base de tu API
 
 class roleTenantService {
     // Obtener todos los roles

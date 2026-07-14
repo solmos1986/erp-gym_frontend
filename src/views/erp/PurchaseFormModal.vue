@@ -292,7 +292,7 @@ function closeModal() {
             </Column>
 
             <Column header="Subtotal">
-                <template #body="{ data }"> Bs {{ data.subtotal?.toFixed(2) || 0 }} </template>
+                <template #body="{ data }">Bs {{ data.subtotal?.toFixed(2) || 0 }}</template>
             </Column>
 
             <Column>
@@ -315,7 +315,10 @@ function closeModal() {
     <!-- ========================= -->
     <Dialog v-model:visible="showConfirmModal" header="Confirmar Compra" modal style="width: 500px">
         <div v-if="pendingPurchase">
-            <div class="mb-2"><b>Total:</b> Bs {{ pendingPurchase.total }}</div>
+            <div class="mb-2">
+                <b>Total:</b>
+                Bs {{ pendingPurchase.total }}
+            </div>
 
             <div class="flex items-center gap-2 mb-3">
                 <Checkbox v-model="isCredit" binary />

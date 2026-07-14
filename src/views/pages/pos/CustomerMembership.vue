@@ -25,7 +25,6 @@ async function sync(customerId) {
         console.log('Sync OK');
         // opcional: recargar tabla
         await load();
-
     } catch (error) {
         console.error('Error sync', error);
     } finally {
@@ -78,8 +77,7 @@ onMounted(load);
             </Column>
             <Column header="Acciones">
                 <template #body="{ data }">
-                    <Button icon="pi pi-sync" class="p-button-sm" :loading="syncing[data.customerId]"
-                        @click="sync(data.customerId)" />
+                    <Button icon="pi pi-sync" class="p-button-sm" :loading="syncing[data.customerId]" @click="sync(data.customerId)" />
                 </template>
             </Column>
         </DataTable>

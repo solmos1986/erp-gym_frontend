@@ -64,8 +64,14 @@ function receiveSeverity(status) {
             <!-- CABECERA -->
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                    <div><b>Proveedor:</b> {{ purchase.partner?.name }}</div>
-                    <div><b>Usuario:</b> {{ purchase.user?.name }}</div>
+                    <div>
+                        <b>Proveedor:</b>
+                        {{ purchase.partner?.name }}
+                    </div>
+                    <div>
+                        <b>Usuario:</b>
+                        {{ purchase.user?.name }}
+                    </div>
                     <div>
                         <b>Fecha:</b>
                         {{ purchase.purchaseDate ? new Date(purchase.purchaseDate).toLocaleString() : new Date(purchase.createdAt).toLocaleString() }}
@@ -113,11 +119,11 @@ function receiveSeverity(status) {
                 </Column>
 
                 <Column header="Precio">
-                    <template #body="{ data }"> Bs {{ data.price }} </template>
+                    <template #body="{ data }">Bs {{ data.price }}</template>
                 </Column>
 
                 <Column header="Subtotal">
-                    <template #body="{ data }"> Bs {{ data.subtotal }} </template>
+                    <template #body="{ data }">Bs {{ data.subtotal }}</template>
                 </Column>
             </DataTable>
 
@@ -138,7 +144,7 @@ function receiveSeverity(status) {
                 </Column>
 
                 <Column header="Monto">
-                    <template #body="{ data }"> Bs {{ data.amount }} </template>
+                    <template #body="{ data }">Bs {{ data.amount }}</template>
                 </Column>
 
                 <Column header="Fecha">
@@ -152,9 +158,18 @@ function receiveSeverity(status) {
 
             <!-- RESUMEN -->
             <div class="border-t pt-3 text-right">
-                <div><b>Total:</b> Bs {{ purchase.total }}</div>
-                <div><b>Pagado:</b> Bs {{ totalPaid }}</div>
-                <div class="font-bold"><b>Saldo:</b> Bs {{ remaining }}</div>
+                <div>
+                    <b>Total:</b>
+                    Bs {{ purchase.total }}
+                </div>
+                <div>
+                    <b>Pagado:</b>
+                    Bs {{ totalPaid }}
+                </div>
+                <div class="font-bold">
+                    <b>Saldo:</b>
+                    Bs {{ remaining }}
+                </div>
             </div>
         </div>
 

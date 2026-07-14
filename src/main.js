@@ -13,6 +13,7 @@ import router from './router';
 import 'primeicons/primeicons.css';
 import StyleClass from 'primevue/styleclass';
 import Toast from 'primevue/toast';
+import Tooltip from 'primevue/tooltip';
 import './assets/styles.scss';
 
 const app = createApp(App);
@@ -39,6 +40,7 @@ async function bootstrap() {
     app.component('Toast', Toast);
     app.use(ConfirmationService);
     app.directive('styleclass', StyleClass);
+    app.directive('tooltip', Tooltip);
 
     app.mount('#app');
 }

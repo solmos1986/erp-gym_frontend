@@ -25,8 +25,8 @@ onMounted(async () => {
 });
 
 const logout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/auth/login";
+    localStorage.removeItem('token');
+    window.location.href = '/auth/login';
 };
 
 const getLogoUrl = () => {
@@ -47,9 +47,12 @@ const getLogoUrl = () => {
 
                 <!-- 🔁 FALLBACK (SAKAI) -->
                 <svg v-else viewBox="0 0 54 40" width="35">
-                    <path fill-rule="evenodd" clip-rule="evenodd"
+                    <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
                         d="M17.1637 19.2467C17.1566 19.4033 17.1529 19.561 17.1529 19.7194C17.1529 25.3503 21.7203 29.915 27.3546 29.915C32.9887 29.915 37.5561 25.3503 37.5561 19.7194C37.5561 19.5572 37.5524 19.3959 37.5449 19.2355..."
-                        fill="var(--primary-color)" />
+                        fill="var(--primary-color)"
+                    />
                 </svg>
 
                 <!-- 🔥 NOMBRE DINÁMICO -->
@@ -65,7 +68,9 @@ const getLogoUrl = () => {
                 <div class="relative">
                     <button
                         v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
-                        type="button" class="layout-topbar-action layout-topbar-action-highlight">
+                        type="button"
+                        class="layout-topbar-action layout-topbar-action-highlight"
+                    >
                         <i class="pi pi-palette"></i>
                     </button>
                     <!-- <AppConfigurator /> -->
@@ -74,7 +79,8 @@ const getLogoUrl = () => {
 
             <button
                 v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
-                class="layout-topbar-menu-button layout-topbar-action">
+                class="layout-topbar-menu-button layout-topbar-action"
+            >
                 <i class="pi pi-ellipsis-v"></i>
             </button>
 

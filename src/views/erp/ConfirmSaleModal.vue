@@ -91,7 +91,10 @@ watch(
 
 <template>
     <Dialog :visible="visible" modal header="Confirmar venta" style="width: 500px" @update:visible="emit('close')">
-        <div class="mb-3"><b>Total venta:</b> Bs {{ sale.total }}</div>
+        <div class="mb-3">
+            <b>Total venta:</b>
+            Bs {{ sale.total }}
+        </div>
 
         <div v-for="(p, i) in payments" :key="i" class="flex gap-2 mb-2">
             <Dropdown v-model="p.methodId" :options="paymentMethods" optionLabel="name" optionValue="id" placeholder="Método" class="w-1/2" />

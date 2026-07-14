@@ -220,7 +220,7 @@ function receiveSeverity(status) {
             </Column>
 
             <Column header="Total">
-                <template #body="{ data }"> Bs {{ data.total }} </template>
+                <template #body="{ data }">Bs {{ data.total }}</template>
             </Column>
 
             <!-- STATUS DOCUMENTO -->

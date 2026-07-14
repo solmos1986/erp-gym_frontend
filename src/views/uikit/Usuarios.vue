@@ -190,7 +190,7 @@ async function deleteRole(id) {
                     </Tag>
                 </template>
             </Column>
-            <Column field="email" header="Email"> </Column>
+            <Column field="email" header="Email"></Column>
             <Column header="Acciones" style="width: 120px">
                 <template #body="{ data }">
                     <Button icon="pi pi-pencil" text @click="editRole(data)" />

@@ -2,7 +2,7 @@
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref } from 'vue';
 import BranchService from '../../service/branch.service';
-import roleTenantService from '../../service/roleTenant.service';
+import roleTenantService from '../../service/role.service';
 import userService from '../../service/user.service';
 import { useAuthStore } from '../../store/auth.store';
 
@@ -133,21 +133,20 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="card">
-        <Toolbar class="mb-6">
+    <div>
+        <div class="flex justify-content-between mb-1">
+            <h3>Usuarios TENANT</h3>
+        </div>
+        <Toolbar class="mb-4">
             <template #start>
-                <Button v-if="canCreate" label="Nuevo Usuario" icon="pi pi-plus" severity="secondary" class="mr-2"
-                    @click="openCreate" />
+                <Button v-if="canCreate" label="Nuevo Usuario" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openCreate" />
             </template>
 
             <template #end>
                 <!-- <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" /> -->
             </template>
         </Toolbar>
-        <div class="flex justify-content-between mb-3">
-            <h3>Usuarios TENANT</h3>
-        </div>
-        <DataTable v-if="canView" :value="users" :loading="loading">
+        <DataTable v-if="canView" :value="users" :loading="loading" paginator :rows="10" :rows-per-page-options="[10, 20, 50]" striped-rows responsive-layout="scroll">
             <Column field="fullName" header="Nombre" />
             <Column field="email" header="Email" />
 
@@ -188,20 +187,17 @@ onMounted(async () => {
 
             <div class="field">
                 <label>Sucursal</label>
-                <Dropdown v-model="form.branchId" :options="branches" option-label="name" option-value="id"
-                    placeholder="Seleccione sucursal" class="w-full" />
+                <Dropdown v-model="form.branchId" :options="branches" option-label="name" option-value="id" placeholder="Seleccione sucursal" class="w-full" />
             </div>
 
             <div class="field">
                 <label>Roles</label>
-                <MultiSelect v-model="form.roles" :options="allroles" option-label="name" option-value="id"
-                    class="w-full" />
+                <MultiSelect v-model="form.roles" :options="allroles" option-label="name" option-value="id" class="w-full" />
             </div>
 
             <div class="field">
                 <label>Password</label>
-                <Password v-model="form.password" type="password" placeholder="*******" toggle-mask class="w-full"
-                    :feedback="false" />
+                <Password v-model="form.password" type="password" placeholder="*******" toggle-mask class="w-full" :feedback="false" />
             </div>
 
             <div class="flex justify-content-end gap-2">

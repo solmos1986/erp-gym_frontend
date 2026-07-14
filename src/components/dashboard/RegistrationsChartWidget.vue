@@ -5,145 +5,82 @@ import DashboardService from '@/service/dashboard.service';
 
 import { useLayout } from '@/layout/composables/layout';
 
-import {
-    onMounted,
-    ref,
-    watch
-} from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
-const {
-    getPrimary,
-    getSurface,
-    isDarkTheme
-} = useLayout();
+const { getPrimary, getSurface, isDarkTheme } = useLayout();
 
 const chartData = ref();
 
 const chartOptions = ref();
 
-const loadChart =
-    async () => {
+const loadChart = async () => {
+    const data = await DashboardService.getRegistrationsComparison();
 
-        const data =
-            await DashboardService
-                .getRegistrationsComparison();
+    const documentStyle = getComputedStyle(document.documentElement);
 
-        const documentStyle =
-            getComputedStyle(
-                document.documentElement
-            );
+    const textColor = documentStyle.getPropertyValue('--text-color');
 
-        const textColor =
-            documentStyle
-                .getPropertyValue(
-                    '--text-color'
-                );
+    const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
 
-        const textColorSecondary =
-            documentStyle
-                .getPropertyValue(
-                    '--text-color-secondary'
-                );
+    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
-        const surfaceBorder =
-            documentStyle
-                .getPropertyValue(
-                    '--surface-border'
-                );
+    chartData.value = {
+        labels: data.labels,
 
-        chartData.value = {
+        datasets: [
+            {
+                label: 'Mes Actual',
 
-            labels:
-                data.labels,
+                backgroundColor: documentStyle.getPropertyValue('--p-primary-500'),
 
-            datasets: [
+                data: data.currentMonth
+            },
 
-                {
-                    label:
-                        'Mes Actual',
+            {
+                label: 'Mes Anterior',
 
-                    backgroundColor:
+                backgroundColor: documentStyle.getPropertyValue('--p-primary-200'),
 
-                        documentStyle
-                            .getPropertyValue(
-                                '--p-primary-500'
-                            ),
+                data: data.previousMonth
+            }
+        ]
+    };
 
-                    data:
-                        data.currentMonth
+    chartOptions.value = {
+        plugins: {
+            legend: {
+                labels: {
+                    color: textColor
+                }
+            }
+        },
+
+        scales: {
+            x: {
+                ticks: {
+                    color: textColorSecondary
                 },
 
-                {
-                    label:
-                        'Mes Anterior',
-
-                    backgroundColor:
-
-                        documentStyle
-                            .getPropertyValue(
-                                '--p-primary-200'
-                            ),
-
-                    data:
-                        data.previousMonth
-                }
-            ]
-        };
-
-        chartOptions.value = {
-
-            plugins: {
-
-                legend: {
-
-                    labels: {
-
-                        color:
-                            textColor
-                    }
+                grid: {
+                    display: false
                 }
             },
 
-            scales: {
-
-                x: {
-
-                    ticks: {
-
-                        color:
-                            textColorSecondary
-                    },
-
-                    grid: {
-
-                        display: false
-                    }
+            y: {
+                ticks: {
+                    color: textColorSecondary
                 },
 
-                y: {
-
-                    ticks: {
-
-                        color:
-                            textColorSecondary
-                    },
-
-                    grid: {
-
-                        color:
-                            surfaceBorder
-                    }
+                grid: {
+                    color: surfaceBorder
                 }
             }
-        };
+        }
     };
+};
 
 watch(
-    [
-        getPrimary,
-        getSurface,
-        isDarkTheme
-    ],
+    [getPrimary, getSurface, isDarkTheme],
 
     loadChart,
 
@@ -152,33 +89,13 @@ watch(
     }
 );
 
-onMounted(
-    loadChart
-);
-
+onMounted(loadChart);
 </script>
 
 <template>
-
     <div class="card">
+        <div class="font-semibold text-xl mb-4">Inscripciones Mes actual vs anterior</div>
 
-        <div class="
-font-semibold
-text-xl
-mb-4
-">
-
-            Inscripciones
-
-            Mes actual
-            vs anterior
-
-        </div>
-
-        <Chart type="bar" :data="chartData
-            " :options="chartOptions
-    " />
-
+        <Chart type="bar" :data="chartData" :options="chartOptions" />
     </div>
-
 </template>

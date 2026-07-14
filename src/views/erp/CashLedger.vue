@@ -212,7 +212,7 @@ function formatDate(date) {
             </Column>
 
             <Column header="Monto">
-                <template #body="{ data }"> Bs {{ data.amount }} </template>
+                <template #body="{ data }">Bs {{ data.amount }}</template>
             </Column>
 
             <Column header="Origen">

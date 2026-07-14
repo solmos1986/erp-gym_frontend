@@ -82,7 +82,6 @@ async function activate(row) {
         });
 
         await loadPlans();
-
     } catch (e) {
         console.error(e);
         toast.add({
@@ -135,8 +134,7 @@ onMounted(async () => {
     <div class="card">
         <Toolbar class="mb-6">
             <template #start>
-                <Button v-if="canCreate" label="Nuevo Plan" icon="pi pi-plus" severity="secondary" class="mr-2"
-                    @click="openCreate" />
+                <Button v-if="canCreate" label="Nuevo Plan" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openCreate" />
             </template>
         </Toolbar>
 
@@ -152,8 +150,7 @@ onMounted(async () => {
 
             <Column header="Estado">
                 <template #body="{ data }">
-                    <Tag :value="data.isActive ? 'Activo' : 'Inactivo'"
-                        :severity="data.isActive ? 'success' : 'danger'" />
+                    <Tag :value="data.isActive ? 'Activo' : 'Inactivo'" :severity="data.isActive ? 'success' : 'danger'" />
                 </template>
             </Column>
 
@@ -161,12 +158,10 @@ onMounted(async () => {
                 <template #body="{ data }">
                     <Button v-if="canUpdate" icon="pi pi-pencil" text @click="openEdit(data)" />
                     <!-- 🗑️ ELIMINAR SOLO SI ESTÁ ACTIVO -->
-                    <Button v-if="data.isActive && canDelete" icon="pi pi-trash" text severity="danger"
-                        @click="remove(data)" />
+                    <Button v-if="data.isActive && canDelete" icon="pi pi-trash" text severity="danger" @click="remove(data)" />
 
                     <!-- ♻️ ACTIVAR SI ESTÁ INACTIVO -->
-                    <Button v-if="!data.isActive && canUpdate" icon="pi pi-refresh" text severity="success"
-                        @click="activate(data)" />
+                    <Button v-if="!data.isActive && canUpdate" icon="pi pi-refresh" text severity="success" @click="activate(data)" />
                 </template>
             </Column>
         </DataTable>

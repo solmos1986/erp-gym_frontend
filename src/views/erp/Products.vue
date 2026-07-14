@@ -268,7 +268,7 @@ async function removeImage() {
         <Toolbar class="mb-6">
             <template #start>
                 <!-- <Dropdown v-model="selectedCompany" :options="companies" optionLabel="name" optionValue="id" placeholder="Seleccionar Empresa" class="mr-2" @change="loadProducts" /> -->
-                <Button label="Nuevo Producto" v-if="canCreate" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openCreate" />
+                <Button v-if="canCreate" label="Nuevo Producto" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openCreate" />
             </template>
 
             <template #end>
@@ -285,10 +285,10 @@ async function removeImage() {
             v-if="canView"
             :value="products"
             :loading="loading"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rows="20"
-            :rowsPerPageOptions="[5, 10, 25]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+            :rows-per-page-options="[5, 10, 25]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} products"
         >
             <Column field="name" header="Producto" sortable style="min-width: 12rem" />
             <Column field="sku" header="SKU" sortable style="min-width: 12rem" />
@@ -299,8 +299,8 @@ async function removeImage() {
 
             <Column header="Acciones" style="width: 12rem">
                 <template #body="{ data }">
-                    <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-if="canUpdate" @click="openEdit(data)" />
-                    <Button icon="pi pi-trash" outlined rounded severity="danger" v-if="canDelete" @click="remove(data)" />
+                    <Button v-if="canUpdate" icon="pi pi-pencil" outlined rounded class="mr-2" @click="openEdit(data)" />
+                    <Button v-if="canDelete" icon="pi pi-trash" outlined rounded severity="danger" @click="remove(data)" />
                 </template>
             </Column>
         </DataTable>
@@ -325,8 +325,8 @@ async function removeImage() {
 
                         <div>
                             <label class="block font-medium mb-1">Tipo producto</label>
-                            <InputGroup><Dropdown v-model="form.productType" :options="enums" optionLabel="label" :class="{ 'p-invalid': isInvalid('productType') }" optionValue="value" placeholder="Seleccionar tipo" class="mr-2" /></InputGroup>
-                            <small v-if="isInvalid('productType')" class="p-error"> Debe seleccionar un tipo de producto </small>
+                            <InputGroup><Dropdown v-model="form.productType" :options="enums" option-label="label" :class="{ 'p-invalid': isInvalid('productType') }" option-value="value" placeholder="Seleccionar tipo" class="mr-2" /></InputGroup>
+                            <small v-if="isInvalid('productType')" class="p-error">Debe seleccionar un tipo de producto</small>
                         </div>
                     </div>
 
@@ -346,7 +346,8 @@ async function removeImage() {
                         <div>
                             <label class="block font-medium mb-1">Precio venta</label>
                             <InputText v-model="form.salePrice" type="number" :class="{ 'p-invalid': isInvalidPrice() }" class="w-full" />
-                            <small v-if="isInvalidPrice()" class="p-error"> Precio de venta debe ser mayor a 0 </small><small v-if="!form.salePrice || form.salePrice <= 0" class="p-error"> Precio de venta debe ser mayor a 0 </small>
+                            <small v-if="isInvalidPrice()" class="p-error">Precio de venta debe ser mayor a 0</small>
+                            <small v-if="!form.salePrice || form.salePrice <= 0" class="p-error">Precio de venta debe ser mayor a 0</small>
                         </div>
                     </div>
 
@@ -359,18 +360,18 @@ async function removeImage() {
                                 <label class="block font-medium mb-1">Clasificacion</label>
                                 <InputGroup>
                                     <Button label="+" @click="showTypeModal = true" />
-                                    <Dropdown v-model="form.typeId" :class="{ 'p-invalid': isInvalid('typeId') }" :options="types" optionLabel="name" optionValue="id" />
+                                    <Dropdown v-model="form.typeId" :class="{ 'p-invalid': isInvalid('typeId') }" :options="types" option-label="name" option-value="id" />
                                 </InputGroup>
-                                <small v-if="isInvalid('typeId')" class="p-error"> Debe seleccionar un tipo </small>
+                                <small v-if="isInvalid('typeId')" class="p-error">Debe seleccionar un tipo</small>
                             </div>
 
                             <div>
                                 <label class="block font-medium mb-1">Categoría</label>
                                 <InputGroup>
                                     <Button label="+" :disabled="!form.typeId" @click="showCategoryModal = true" />
-                                    <Dropdown v-model="form.categoryId" :class="{ 'p-invalid': isInvalid('categoryId') }" :disabled="!form.typeId" :options="categories" optionLabel="name" optionValue="id" />
+                                    <Dropdown v-model="form.categoryId" :class="{ 'p-invalid': isInvalid('categoryId') }" :disabled="!form.typeId" :options="categories" option-label="name" option-value="id" />
                                 </InputGroup>
-                                <small v-if="isInvalid('categoryId')" class="p-error"> Debe seleccionar una categoría </small>
+                                <small v-if="isInvalid('categoryId')" class="p-error">Debe seleccionar una categoría</small>
                             </div>
                         </div>
 
@@ -379,7 +380,7 @@ async function removeImage() {
                                 <label class="block font-medium mb-1">Subcategoría</label>
                                 <InputGroup>
                                     <Button label="+" :disabled="!form.categoryId" @click="showSubCategoryModal = true" />
-                                    <Dropdown v-model="form.subcategoryId" :disabled="!form.categoryId" :options="subCategories" optionLabel="name" optionValue="id" />
+                                    <Dropdown v-model="form.subcategoryId" :disabled="!form.categoryId" :options="subCategories" option-label="name" option-value="id" />
                                 </InputGroup>
                             </div>
 
@@ -387,7 +388,7 @@ async function removeImage() {
                                 <label class="block font-medium mb-1">Marca</label>
                                 <InputGroup>
                                     <Button label="+" @click="showBrandModal = true" />
-                                    <Dropdown v-model="form.brandId" :options="brands" optionLabel="name" optionValue="id" />
+                                    <Dropdown v-model="form.brandId" :options="brands" option-label="name" option-value="id" />
                                 </InputGroup>
                             </div>
                         </div>
@@ -407,7 +408,7 @@ async function removeImage() {
 
                         <!-- BOTONES -->
                         <div class="flex items-center gap-3">
-                            <FileUpload mode="basic" name="image" accept="image/*" chooseLabel="Elegir imagen" @select="onImageSelect" customUpload />
+                            <FileUpload mode="basic" name="image" accept="image/*" choose-label="Elegir imagen" custom-upload @select="onImageSelect" />
 
                             <Button v-if="imagePreview" label="Quitar" icon="pi pi-times" severity="danger" text @click="removeImage" />
                         </div>
@@ -420,22 +421,22 @@ async function removeImage() {
             </div>
         </Dialog>
         <!-- MODALES SECUNDARIOS -->
-        <Dialog v-model:visible="showTypeModal" modal header="Nuevo Tipo" :baseZIndex="1100">
+        <Dialog v-model:visible="showTypeModal" modal header="Nuevo Tipo" :base-z-index="1100">
             <InputText v-model="typeForm.name" placeholder="Nombre tipo" />
             <Button label="Guardar" @click="saveType" />
         </Dialog>
 
-        <Dialog v-model:visible="showCategoryModal" modal header="Nueva Categoría" :baseZIndex="1100">
+        <Dialog v-model:visible="showCategoryModal" modal header="Nueva Categoría" :base-z-index="1100">
             <InputText v-model="categoryForm.name" placeholder="Nombre categoría" />
             <Button label="Guardar" @click="saveCategory" />
         </Dialog>
 
-        <Dialog v-model:visible="showSubCategoryModal" modal header="Nueva Subcategoría" :baseZIndex="1100">
+        <Dialog v-model:visible="showSubCategoryModal" modal header="Nueva Subcategoría" :base-z-index="1100">
             <InputText v-model="subCategoryForm.name" placeholder="Nombre subcategoría" />
             <Button label="Guardar" @click="saveSubCategory" />
         </Dialog>
 
-        <Dialog v-model:visible="showBrandModal" modal header="Nueva Marca" :baseZIndex="1100">
+        <Dialog v-model:visible="showBrandModal" modal header="Nueva Marca" :base-z-index="1100">
             <InputText v-model="brandForm.name" placeholder="Nombre marca" />
             <Button label="Guardar" @click="saveBrand" />
         </Dialog>

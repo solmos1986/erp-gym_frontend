@@ -575,7 +575,7 @@ const blocksCode = {
                 <div class="flex flex-col gap-6">
                     <div class="flex flex-col items-center gap-4">
                         <div class="font-bold text-3xl leading-tight">
-                            <span class="text-surface-900 dark:text-surface-0">One Product, </span>
+                            <span class="text-surface-900 dark:text-surface-0">One Product,</span>
                             <span class="text-primary-500 dark:text-primary-400">Many Solutions</span>
                         </div>
                         <div class="text-surface-500 dark:text-surface-400 leading-tight">Ac turpis egestas maecenas pharetra convallis posuere morbi leo urna.</div>
@@ -659,7 +659,7 @@ const blocksCode = {
                         <div class="flex flex-col gap-2 w-full">
                             <div class="text-center text-3xl font-medium text-white leading-tight">Welcome Back</div>
                             <div class="text-center">
-                                <span class="text-white/80">Don't have an account? </span>
+                                <span class="text-white/80">Don't have an account?</span>
                                 <a class="text-white/80 cursor-pointer hover:text-white/90 underline">Sign up</a>
                             </div>
                         </div>
@@ -706,15 +706,15 @@ const blocksCode = {
                         <ul class="list-none flex flex-col gap-4 flex-1">
                             <li class="flex items-center gap-2">
                                 <i class="pi pi-check-circle text-lg! text-green-500" />
-                                <span class="text-surface-800 dark:text-surface-100 leading-tight"> Arcu vitae elementum </span>
+                                <span class="text-surface-800 dark:text-surface-100 leading-tight">Arcu vitae elementum</span>
                             </li>
                             <li class="flex items-center gap-2">
                                 <i class="pi pi-check-circle text-lg! text-green-500" />
-                                <span class="text-surface-800 dark:text-surface-100 leading-tight"> Dui faucibus in ornare </span>
+                                <span class="text-surface-800 dark:text-surface-100 leading-tight">Dui faucibus in ornare</span>
                             </li>
                             <li class="flex items-center gap-2">
                                 <i class="pi pi-check-circle text-lg! text-green-500" />
-                                <span class="text-surface-800 dark:text-surface-100 leading-tight"> Morbi tincidunt augue </span>
+                                <span class="text-surface-800 dark:text-surface-100 leading-tight">Morbi tincidunt augue</span>
                             </li>
                         </ul>
                         <Button label="Buy Now" rounded class="w-full" />
@@ -734,19 +734,19 @@ const blocksCode = {
                         <ul class="list-none flex flex-col gap-4 flex-1">
                             <li class="flex items-center gap-2">
                                 <i class="pi pi-check-circle text-lg! text-green-500" />
-                                <span class="text-surface-800 dark:text-surface-100 leading-tight"> Arcu vitae elementum </span>
+                                <span class="text-surface-800 dark:text-surface-100 leading-tight">Arcu vitae elementum</span>
                             </li>
                             <li class="flex items-center gap-2">
                                 <i class="pi pi-check-circle text-lg! text-green-500" />
-                                <span class="text-surface-800 dark:text-surface-100 leading-tight"> Dui faucibus in ornare </span>
+                                <span class="text-surface-800 dark:text-surface-100 leading-tight">Dui faucibus in ornare</span>
                             </li>
                             <li class="flex items-center gap-2">
                                 <i class="pi pi-check-circle text-lg! text-green-500" />
-                                <span class="text-surface-800 dark:text-surface-100 leading-tight"> Morbi tincidunt augue </span>
+                                <span class="text-surface-800 dark:text-surface-100 leading-tight">Morbi tincidunt augue</span>
                             </li>
                             <li class="flex items-center gap-2">
                                 <i class="pi pi-check-circle text-lg! text-green-500" />
-                                <span class="text-surface-800 dark:text-surface-100 leading-tight"> Duis ultricies lacus sed </span>
+                                <span class="text-surface-800 dark:text-surface-100 leading-tight">Duis ultricies lacus sed</span>
                             </li>
                         </ul>
                         <Button label="Buy Now" rounded class="w-full" />
@@ -766,23 +766,23 @@ const blocksCode = {
                         <ul class="list-none flex flex-col gap-4 flex-1">
                             <li class="flex items-center gap-2">
                                 <i class="pi pi-check-circle text-lg! text-green-500" />
-                                <span class="text-surface-800 dark:text-surface-100 leading-tight"> Arcu vitae elementum </span>
+                                <span class="text-surface-800 dark:text-surface-100 leading-tight">Arcu vitae elementum</span>
                             </li>
                             <li class="flex items-center gap-2">
                                 <i class="pi pi-check-circle text-lg! text-green-500" />
-                                <span class="text-surface-800 dark:text-surface-100 leading-tight"> Dui faucibus in ornare </span>
+                                <span class="text-surface-800 dark:text-surface-100 leading-tight">Dui faucibus in ornare</span>
                             </li>
                             <li class="flex items-center gap-2">
                                 <i class="pi pi-check-circle text-lg! text-green-500" />
-                                <span class="text-surface-800 dark:text-surface-100 leading-tight"> Morbi tincidunt augue </span>
+                                <span class="text-surface-800 dark:text-surface-100 leading-tight">Morbi tincidunt augue</span>
                             </li>
                             <li class="flex items-center gap-2">
                                 <i class="pi pi-check-circle text-lg! text-green-500" />
-                                <span class="text-surface-800 dark:text-surface-100 leading-tight"> Duis ultricies lacus sed </span>
+                                <span class="text-surface-800 dark:text-surface-100 leading-tight">Duis ultricies lacus sed</span>
                             </li>
                             <li class="flex items-center gap-2">
                                 <i class="pi pi-check-circle text-lg! text-green-500" />
-                                <span class="text-surface-800 dark:text-surface-100 leading-tight"> Imperdiet proin </span>
+                                <span class="text-surface-800 dark:text-surface-100 leading-tight">Imperdiet proin</span>
                             </li>
                         </ul>
                         <Button label="Buy Now" rounded class="w-full" />
@@ -795,7 +795,10 @@ const blocksCode = {
         <BlockViewer header="Call to Action" :code="blocksCode.cta" free>
             <div class="bg-surface-0 dark:bg-surface-950 px-6 py-20 md:px-12 lg:px-20">
                 <div class="text-surface-700 dark:text-surface-100 text-center flex flex-col items-center gap-4">
-                    <div class="text-primary font-bold text-lg leading-tight"><i class="pi pi-discord text-lg! leading-none!" />&nbsp;POWERED BY DISCORD</div>
+                    <div class="text-primary font-bold text-lg leading-tight">
+                        <i class="pi pi-discord text-lg! leading-none!" />
+                        &nbsp;POWERED BY DISCORD
+                    </div>
                     <div class="text-surface-900 dark:text-surface-0 font-bold text-4xl leading-tight">Join our design community</div>
                     <div class="text-surface-700 dark:text-surface-100 text-xl leading-normal">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Velit numquam eligendi quos.</div>
                     <Button label="Join Now" icon="pi pi-discord" rounded class="mt-4" />
@@ -873,7 +876,7 @@ const blocksCode = {
                         </div>
                         <div class="mt-4">
                             <span class="text-surface-600 dark:text-surface-300 font-medium leading-tight">24 new</span>
-                            <span class="text-surface-500 dark:text-surface-300 leading-tight"> since last visit</span>
+                            <span class="text-surface-500 dark:text-surface-300 leading-tight">since last visit</span>
                         </div>
                     </div>
 
@@ -889,7 +892,7 @@ const blocksCode = {
                         </div>
                         <div class="mt-4">
                             <span class="text-surface-600 dark:text-surface-300 font-medium leading-tight">48 new</span>
-                            <span class="text-surface-500 dark:text-surface-300 leading-tight"> since last visit</span>
+                            <span class="text-surface-500 dark:text-surface-300 leading-tight">since last visit</span>
                         </div>
                     </div>
 
@@ -920,7 +923,7 @@ const blocksCode = {
                         </div>
                         <div class="mt-4">
                             <span class="text-surface-600 dark:text-surface-300 font-medium leading-tight">72 new</span>
-                            <span class="text-surface-500 dark:text-surface-300 leading-tight"> user this week</span>
+                            <span class="text-surface-500 dark:text-surface-300 leading-tight">user this week</span>
                         </div>
                     </div>
                 </div>

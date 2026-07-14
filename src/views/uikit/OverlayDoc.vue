@@ -101,7 +101,7 @@ function confirm(event) {
                                 </template>
                             </Column>
                             <Column field="price" header="Price" sortable style="min-width: 8rem">
-                                <template #body="slotProps"> $ {{ slotProps.data.price }} </template>
+                                <template #body="slotProps">$ {{ slotProps.data.price }}</template>
                             </Column>
                         </DataTable>
                     </Popover>

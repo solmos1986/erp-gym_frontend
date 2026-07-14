@@ -9,46 +9,27 @@ import PlanDistributionWidget from '../../../components/dashboard/PlanDistributi
 </script>
 
 <template>
-
     <div class="grid grid-cols-12 gap-8">
-
         <!-- KPIs -->
 
         <GymStatsWidget />
 
         <!-- 💰 REVENUE -->
 
-        <div class="
-    col-span-12
-    xl:col-span-6
-    ">
-
+        <div class="col-span-12 xl:col-span-6">
             <RevenueChartWidget />
-
         </div>
 
         <!-- 📅 REGISTRATIONS -->
 
-        <div class="
-    col-span-12
-    xl:col-span-6
-    ">
-
+        <div class="col-span-12 xl:col-span-6">
             <RegistrationsChartWidget />
-
         </div>
 
         <!-- 🍩 PLANES -->
 
-        <div class="
-col-span-12
-xl:col-span-6
-">
-
+        <div class="col-span-12 xl:col-span-6">
             <PlanDistributionWidget />
-
         </div>
-
     </div>
-
 </template>

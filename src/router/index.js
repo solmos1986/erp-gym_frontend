@@ -20,6 +20,16 @@ const routes = [
                 component: () => import('@/views/platform/Empresas.vue'),
                 beforeEnter: permissionGuard('SYSTEM_COMPANIES_VIEW')
             },
+            {
+                path: 'business-templates',
+                component: () => import('@/views/platform/BusinessTemplate.vue'),
+                beforeEnter: permissionGuard('SYSTEM_COMPANIES_VIEW')
+            },
+            {
+                path: 'permissions',
+                component: () => import('@/views/platform/Permissions.vue'),
+                beforeEnter: permissionGuard('SYSTEM_COMPANIES_VIEW')
+            },
             // {
             //     path: 'users-staff',
             //     component: () => import('@/views/platform/UserStaff.vue'),
@@ -49,11 +59,6 @@ const routes = [
                 component: () => import('@/views/pages/pos/Dashboard.vue'),
                 beforeEnter: permissionGuard('TENANT_DASHBOARD_VIEW')
             },
-            // {
-            //     path: 'products',
-            //     component: () => import('@/views/erp/Products.vue'),
-            //     beforeEnter: permissionGuard('ERP_PRODUCTS_VIEW')
-            // },
             {
                 path: '',
                 redirect: '/dashboard' //aqui cambiar por la vista DASHBOARD
@@ -84,43 +89,123 @@ const routes = [
                 path: 'platform/devices',
                 component: () => import('@/views/platform/Devices.vue')
                 //beforeEnter: permissionGuard('TENANT_DEVICES_VIEW')
-            }
+            },
+            {
+                path: '/inventory',
+                name: 'inventory',
 
-            // {
-            //     path: 'erp/saleticket',
-            //     component: () => import('@/views/erp/SaleTicket.vue'),
-            //     beforeEnter: permissionGuard('ERP_SALES_TICKET_VIEW')
-            // },
-            // {
-            //     path: 'sales',
-            //     component: () => import('@/views/erp/Sales.vue'),
-            //     beforeEnter: permissionGuard('ERP_SALES_VIEW')
-            // },
-            // {
-            //     path: 'open-cash-register',
-            //     component: () => import('@/views/erp/OpenCashRegister.vue'),
-            //     beforeEnter: permissionGuard('ERP_CASHBOX_VIEW')
-            // },
-            // {
-            //     path: 'cash-boxes',
-            //     component: () => import('@/views/erp/CashBox.vue'),
-            //     beforeEnter: permissionGuard('ERP_CASHBOX_VIEW')
-            // },
-            // {
-            //     path: 'cash-reports',
-            //     component: () => import('@/views/erp/CashReport.vue'),
-            //     beforeEnter: permissionGuard('ERP_TREASURY_VIEW')
-            // },
-            // {
-            //     path: 'cash-movements',
-            //     component: () => import('@/views/erp/CashLedger.vue'),
-            //     beforeEnter: permissionGuard('ERP_TREASURY_VIEW')
-            // },
-            // {
-            //     path: 'purchases',
-            //     component: () => import('@/views/erp/PurchaseList.vue'),
-            //     beforeEnter: permissionGuard('ERP_PURCHASES_VIEW')
-            // }
+                component: () => import('@/views/inventory/InventoryDashboard.vue'),
+
+                meta: {
+                    permission: 'TENANT_INVENTORY_VIEW'
+                }
+            }
+        ]
+    },
+    {
+        path: '/warehouse',
+        component: () => import('@/layout/AppLayout.vue'),
+        //beforeEnter: authGuard,
+        children: [
+            {
+                path: 'product-categories',
+                component: () => import('@/views/pages/warehouse/ProductCategories.vue'),
+                beforeEnter: permissionGuard('TENANT_PRODUCT_CATEGORIES_VIEW')
+            },
+            {
+                path: 'products',
+                component: () => import('@/modules/products/views/Products.vue'),
+                beforeEnter: permissionGuard('TENANT_PRODUCTS_VIEW')
+            },
+            {
+                path: 'stock',
+                component: () => import('@/views/pages/warehouse/Stock.vue'),
+                beforeEnter: permissionGuard('TENANT_INVENTORY_VIEW')
+            },
+            {
+                path: 'movements',
+                component: () => import('@/views/pages/warehouse/Movements.vue'),
+                beforeEnter: permissionGuard('TENANT_INVENTORY_VIEW')
+            },
+            {
+                path: 'kardex',
+                component: () => import('@/views/pages/warehouse/Kardex.vue'),
+                beforeEnter: permissionGuard('TENANT_INVENTORY_VIEW')
+            }
+        ]
+    },
+    {
+        path: '/cash-register',
+        component: () => import('@/layout/AppLayout.vue'),
+        children: [
+            {
+                path: 'current',
+                component: () => import('@/views/pages/cash/CashRegister.vue'),
+                beforeEnter: permissionGuard('TENANT_CASH_VIEW')
+            }
+        ]
+    },
+    {
+        path: '/product-sales',
+        component: () => import('@/layout/AppLayout.vue'),
+        children: [
+            {
+                path: '',
+                component: () => import('@/views/pages/pos/ProductSale.vue'),
+                beforeEnter: permissionGuard('TENANT_SALES_VIEW')
+            }
+        ]
+    },
+    {
+        path: '/purchases',
+        component: () => import('@/layout/AppLayout.vue'),
+        children: [
+            {
+                path: '',
+                component: () => import('@/views/pages/pos/ProductPurchase.vue'),
+                beforeEnter: permissionGuard('TENANT_PURCHASES_VIEW')
+            }
+        ]
+    },
+    {
+        path: '/reports',
+        component: () => import('@/layout/AppLayout.vue'),
+        children: [
+            {
+                path: 'sales',
+                component: () => import('@/views/reports/SalesReport.vue'),
+                beforeEnter: permissionGuard('TENANT_REPORT_VIEW')
+            },
+            {
+                path: 'cash',
+                component: () => import('@/views/reports/CashReport.vue'),
+                beforeEnter: permissionGuard('TENANT_REPORT_VIEW')
+            },
+            {
+                path: 'cash/:id',
+                component: () => import('@/views/reports/CashDetailReport.vue'),
+                beforeEnter: permissionGuard('TENANT_REPORT_VIEW')
+            },
+            {
+                path: 'memberships',
+                component: () => import('@/views/reports/MembershipReport.vue'),
+                beforeEnter: permissionGuard('TENANT_REPORT_VIEW')
+            },
+            {
+                path: 'inventory',
+                component: () => import('@/views/reports/InventoryReport.vue'),
+                beforeEnter: permissionGuard('TENANT_REPORT_VIEW')
+            },
+            {
+                path: 'purchases',
+                component: () => import('@/views/reports/PurchaseReport.vue'),
+                beforeEnter: permissionGuard('TENANT_REPORT_VIEW')
+            },
+            {
+                path: 'profitability',
+                component: () => import('@/views/reports/ProfitabilityReport.vue'),
+                beforeEnter: permissionGuard('TENANT_REPORT_VIEW')
+            }
         ]
     }
 ];

@@ -10,115 +10,199 @@ const auth = useAuthStore();
  */
 const model = [
     {
-        label: 'Plataforma',
+        label: 'DASHBOARD',
+        items: [
+            {
+                label: 'Dashboard',
+                icon: 'pi pi-home',
+                to: '/dashboard',
+                permission: 'TENANT_DASHBOARD_VIEW'
+            },
+            {
+                label: 'Inventario',
+                icon: 'pi pi-box',
+                to: '/inventory',
+                permission: 'TENANT_INVENTORY_VIEW'
+            }
+        ]
+    },
+    {
+        label: 'ADMINISTRACION',
         items: [
             {
                 label: 'Empresas',
                 icon: 'pi pi-building',
                 to: '/platform/companies',
-                permission: 'SYSTEM_COMPANIES_VIEW' // Permiso que controlará la visibilidad
+                permission: 'SYSTEM_COMPANIES_VIEW'
+            },
+            {
+                label: 'Verticales',
+                icon: 'pi pi-sitemap',
+                to: '/platform/business-templates',
+                permission: 'SYSTEM_COMPANIES_VIEW'
+            },
+            {
+                label: 'Permisos',
+                icon: 'pi pi-sitemap',
+                to: '/platform/permissions',
+                permission: 'SYSTEM_COMPANIES_VIEW'
             },
             {
                 label: 'Roles',
                 icon: 'pi pi-shield',
                 to: '/platform/roles-tenant',
-                permission: 'TENANT_ROLES_VIEW' // Permiso que controlará la visibilidad
+                permissions: ['TENANT_ROLES_VIEW', 'SYSTEM_COMPANIES_VIEW']
             },
-            // {
-            //     label: 'Usuarios Staff',
-            //     icon: 'pi pi-users',
-            //     to: '/platform/users-staff',
-            //     permission: 'PLATFORM_USERS_VIEW' // Permiso que controlará la visibilidad
-            // },
-            // {
-            //     label: 'Roles Empresas',
-            //     icon: 'pi pi-shield',
-            //     to: '/platform/roles-erp',
-            //     permission: 'ERP_ROLES_VIEW' // Permiso que controlará la visibilidad
-            // },
             {
                 label: 'Usuarios',
                 icon: 'pi pi-users',
                 to: '/platform/users-erp',
-                permission: 'TENANT_USERS_VIEW' // Permiso que controlará la visibilidad
+                permission: 'TENANT_USERS_VIEW'
             },
             {
                 label: 'Dispositivos',
                 icon: 'pi pi-desktop',
                 to: '/platform/devices',
-                permission: 'TENANT_DEVICES_VIEW' // Permiso que controlará la visibilidad
+                permission: 'TENANT_DEVICES_VIEW'
             }
         ]
     },
     {
-        label: 'ERP',
+        label: 'MEMBRESIAS',
         items: [
             {
-                label: 'Dashboard',
-                icon: 'pi pi-chart-line',
-                to: '/dashboard',
-                permission: 'TENANT_DASHBOARD_VIEW' // Permiso para ver el dashboard
-            },
-            // {
-            //     label: 'Productos',
-            //     icon: 'pi pi-box',
-            //     to: '/products',
-            //     permission: 'ERP_PRODUCTS_VIEW' // Permiso para productos
-            // },
-            {
                 label: 'Clientes',
-                icon: 'pi pi-users',
+                icon: 'pi pi-user',
                 to: '/partners',
-                permission: 'TENANT_PARTNER_VIEW' // Permiso para ventas
+                permission: 'TENANT_PARTNER_VIEW'
             },
             {
                 label: 'Planes',
-                icon: 'pi pi-shopping-cart',
+                icon: 'pi pi-id-card',
                 to: '/plan',
-                permission: 'TENANT_PLANS_VIEW' // Permiso para ventas
+                permission: 'TENANT_PLANS_VIEW'
             },
             {
-                label: 'Inscripciones',
-                icon: 'pi pi-shopping-cart',
-                to: '/memberships',
-                permission: 'TENANT_MEMBERSHIP_VIEW' // Permiso para ventas
-            },
-            {
-                label: 'Membresias Status',
-                icon: 'pi pi-shopping-cart',
+                label: 'Estado Membresias',
+                icon: 'pi pi-calendar',
                 to: '/memberships-status',
-                permission: 'TENANT_MEMBERSHIP_VIEW' // Permiso para ventas
+                permission: 'TENANT_MEMBERSHIP_VIEW'
             }
-            // {
-            //     label: 'Ventas',
-            //     icon: 'pi pi-arrow-up-right',
-            //     to: '/sales',
-            //     permission: 'ERP_SALES_VIEW' // Permiso para ventas
-            // },
-            // {
-            //     label: 'Cajas',
-            //     icon: 'pi pi-wallet',
-            //     to: '/cash-boxes',
-            //     permission: 'ERP_CASHBOX_VIEW' // Permiso para ventas
-            // },
-            // {
-            //     label: 'Reporte_Cajas',
-            //     icon: 'pi pi-file-pdf',
-            //     to: '/cash-reports',
-            //     permission: 'ERP_TREASURY_VIEW' // Permiso para ventas
-            // },
-            // {
-            //     label: 'Tesoreria',
-            //     icon: 'pi pi-dollar',
-            //     to: '/cash-movements',
-            //     permission: 'ERP_TREASURY_VIEW' // Permiso para ventas
-            // },
-            // {
-            //     label: 'Compras',
-            //     icon: 'pi pi-arrow-down-left',
-            //     to: '/purchases',
-            //     permission: 'ERP_PURCHASES_VIEW' // Permiso para ventas
-            // }
+        ]
+    },
+    {
+        label: 'VENTAS',
+        items: [
+            {
+                label: 'Venta de Productos',
+                icon: 'pi pi-shopping-cart',
+                to: '/product-sales',
+                permission: 'TENANT_SALES_VIEW'
+            },
+            {
+                label: 'Inscripciones/Renovaciones',
+                icon: 'pi pi-ticket',
+                to: '/memberships',
+                permission: 'TENANT_MEMBERSHIP_VIEW'
+            }
+        ]
+    },
+    {
+        label: 'COMPRAS',
+        items: [
+            {
+                label: 'Compra de Productos',
+                icon: 'pi pi-shopping-bag',
+                to: '/purchases',
+                permission: 'TENANT_PURCHASES_VIEW'
+            }
+        ]
+    },
+    {
+        label: 'ALMACEN',
+        items: [
+            {
+                label: 'Categorias de Productos',
+                icon: 'pi pi-tags',
+                to: '/warehouse/product-categories',
+                permission: 'TENANT_PRODUCT_CATEGORIES_VIEW'
+            },
+            {
+                label: 'Productos',
+                icon: 'pi pi-box',
+                to: '/warehouse/products',
+                permission: 'TENANT_PRODUCTS_VIEW'
+            },
+            {
+                label: 'Stock',
+                icon: 'pi pi-warehouse',
+                to: '/warehouse/stock',
+                permission: 'TENANT_INVENTORY_VIEW'
+            },
+            {
+                label: 'Movimientos',
+                icon: 'pi pi-arrow-right-arrow-left',
+                to: '/warehouse/movements',
+                permission: 'TENANT_INVENTORY_VIEW'
+            },
+            {
+                label: 'Kardex',
+                icon: 'pi pi-book',
+                to: '/warehouse/kardex',
+                permission: 'TENANT_INVENTORY_VIEW'
+            }
+        ]
+    },
+    {
+        label: 'CAJA',
+        items: [
+            {
+                label: 'Caja Actual',
+                icon: 'pi pi-wallet',
+                to: '/cash-register/current',
+                permission: 'TENANT_CASH_VIEW'
+            }
+        ]
+    },
+    {
+        label: 'REPORTES',
+        items: [
+            {
+                label: 'Ventas',
+                icon: 'pi pi-chart-bar',
+                to: '/reports/sales',
+                permission: 'TENANT_REPORT_VIEW'
+            },
+            {
+                label: 'Caja',
+                icon: 'pi pi-money-bill',
+                to: '/reports/cash',
+                permission: 'TENANT_REPORT_VIEW'
+            },
+            {
+                label: 'Membresías',
+                icon: 'pi pi-users',
+                to: '/reports/memberships',
+                permission: 'TENANT_REPORT_VIEW'
+            },
+            {
+                label: 'Inventario',
+                icon: 'pi pi-box',
+                to: '/reports/inventory',
+                permission: 'TENANT_REPORT_VIEW'
+            },
+            {
+                label: 'Compras',
+                icon: 'pi pi-shopping-bag',
+                to: '/reports/purchases',
+                permission: 'TENANT_REPORT_VIEW'
+            },
+            {
+                label: 'Rentabilidad',
+                icon: 'pi pi-chart-line',
+                to: '/reports/profitability',
+                permission: 'TENANT_REPORT_VIEW'
+            }
         ]
     }
 ];

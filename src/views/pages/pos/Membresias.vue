@@ -16,34 +16,36 @@ let ws;
 // WS CONNECT
 // =====================
 function connectWebSocket() {
-    ws = new WebSocket("wss://apigymcloud.aplus-security.com/ws/");
+    ws = new WebSocket('wss://apigymcloud.aplus-security.com/ws/');
 
     ws.onopen = () => {
-        console.log("🟢 WS conectado (frontend)");
+        console.log('🟢 WS conectado (frontend)');
 
-        ws.send(JSON.stringify({
-            type: "REGISTER_FRONTEND"
-        }));
+        ws.send(
+            JSON.stringify({
+                type: 'REGISTER_FRONTEND'
+            })
+        );
     };
 
     ws.onmessage = async (event) => {
         const data = JSON.parse(event.data);
-        console.log("📥 WS:", data);
+        console.log('📥 WS:', data);
 
         // 🔥 SOLO RECARGA CUANDO HAY CAMBIOS
-        if (data.type === "MEMBERSHIP_UPDATE") {
-            console.log("🔄 Recargando memberships...");
+        if (data.type === 'MEMBERSHIP_UPDATE') {
+            console.log('🔄 Recargando memberships...');
             await loadAll();
         }
     };
 
     ws.onclose = () => {
-        console.log("🔴 WS desconectado, reconectando...");
+        console.log('🔴 WS desconectado, reconectando...');
         setTimeout(connectWebSocket, 5000);
     };
 
     ws.onerror = (err) => {
-        console.error("❌ WS error:", err);
+        console.error('❌ WS error:', err);
     };
 }
 
@@ -67,14 +69,15 @@ const selectedPartner = ref(null);
 const filteredPartners = ref([]);
 const form = ref({
     partnerId: '',
-    planId: ''
+    planId: '',
+    payments: []
 });
 
 const filters = ref({
     search: '',
     planId: null,
     userId: null,
-    status: 'ACTIVE',
+    status: null,
     from: null,
     to: null
 });
@@ -90,6 +93,31 @@ const canCreate = computed(() => auth.can('TENANT_MEMBERSHIP_CREATE'));
 const selectedSale = ref(null);
 
 const annulDialog = ref(false);
+const selectedPlan = computed(() => plans.value.find((p) => p.id === form.value.planId));
+
+const total = computed(() => Number(selectedPlan.value?.price || 0));
+const paymentMethods = [
+    { label: 'Efectivo', value: 'CASH' },
+    { label: 'QR', value: 'QR' },
+    { label: 'Tarjeta', value: 'CARD' },
+    { label: 'Transferencia', value: 'TRANSFER' },
+    { label: 'Depósito', value: 'DEPOSIT' }
+];
+
+const paymentRow = () => ({
+    method: 'CASH',
+    amount: 0,
+    reference: ''
+});
+function addPayment() {
+    form.value.payments.push(paymentRow());
+}
+
+function removePayment(index) {
+    if (form.value.payments.length <= 1) return;
+
+    form.value.payments.splice(index, 1);
+}
 
 async function loadAll() {
     loading.value = true;
@@ -103,15 +131,14 @@ async function loadAll() {
             from: filters.value.from,
             to: filters.value.to
         };
-
+        console.log('Cargando memberships con params:', params);
         const data = await MembershipService.getAll(params);
+        console.log('Cargando memberships con params:', params);
+        memberships.value = data.sort((a, b) => new Date(b.saleDate) - new Date(a.saleDate));
 
-        memberships.value = data.sort(
-            (a, b) =>
-                new Date(b.saleDate) - new Date(a.saleDate)
-        );
-
-        partners.value = await PartnerService.getAll();
+        partners.value = await PartnerService.getAll({
+            type: 'CUSTOMER'
+        });
         plans.value = await PlanService.getAll();
         users.value = await UserService.getAll();
     } finally {
@@ -119,15 +146,13 @@ async function loadAll() {
     }
 }
 function searchPartners(event) {
-    console.log("buscando:", event.query);
+    console.log('buscando:', event.query);
 
     const query = event.query.toLowerCase();
 
-    filteredPartners.value = partners.value.filter((p) =>
-        p.name.toLowerCase().includes(query)
-    );
+    filteredPartners.value = partners.value.filter((p) => p.name.toLowerCase().includes(query));
 
-    console.log("resultados:", filteredPartners.value);
+    console.log('resultados:', filteredPartners.value);
 }
 const getPDFBlob = async () => {
     const response = await MembershipService.getReportPDF(filters.value);
@@ -185,7 +210,8 @@ watch(filters, loadAll, { deep: true });
 function openCreate() {
     form.value = {
         partnerId: '',
-        planId: ''
+        planId: '',
+        payments: [paymentRow()]
     };
 
     selectedStatus.value = null;
@@ -207,17 +233,32 @@ watch(
 watch(selectedPartner, (val) => {
     form.value.partnerId = val?.id || '';
 });
-watch(dialogVisible, (val) => {
+watch(
+    () => form.value.planId,
+    (planId) => {
+        if (!planId) return;
 
+        const plan = plans.value.find((p) => p.id === planId);
+
+        form.value.payments = [
+            {
+                method: 'CASH',
+                amount: Number(plan?.price || 0),
+                reference: ''
+            }
+        ];
+    }
+);
+watch(dialogVisible, (val) => {
     if (!val) {
         resetDialog();
     }
 });
 function resetDialog() {
-
     form.value = {
         partnerId: '',
-        planId: ''
+        planId: '',
+        payments: [paymentRow()]
     };
 
     selectedPartner.value = null;
@@ -231,6 +272,7 @@ async function purchase() {
     if (purchaseLoading.value) return;
 
     purchaseLoading.value = true;
+
     try {
         if (!form.value.partnerId || !form.value.planId) {
             toast.add({
@@ -238,10 +280,27 @@ async function purchase() {
                 summary: 'Cliente y plan son obligatorios',
                 life: 3000
             });
+
             return;
         }
 
-        await MembershipService.purchase(form.value);
+        const paidTotal = form.value.payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+
+        if (paidTotal !== total.value) {
+            toast.add({
+                severity: 'warn',
+                summary: `Los pagos deben sumar Bs ${total.value}`,
+                life: 4000
+            });
+
+            return;
+        }
+
+        await MembershipService.purchase({
+            partnerId: form.value.partnerId,
+            planId: form.value.planId,
+            payments: form.value.payments
+        });
 
         toast.add({
             severity: 'success',
@@ -250,6 +309,7 @@ async function purchase() {
         });
 
         dialogVisible.value = false;
+
         await loadAll();
     } catch (e) {
         toast.add({
@@ -257,13 +317,39 @@ async function purchase() {
             summary: e?.response?.data?.message || 'Error procesando membresía',
             life: 3000
         });
-    }
-    finally {
-
+    } finally {
         purchaseLoading.value = false;
     }
 }
+const getSyncTooltip = (sale) => {
+    const cmd = sale.commands?.find((c) => c.status === 'ERROR');
 
+    if (!cmd?.error) return null;
+
+    try {
+        const e = JSON.parse(cmd.error);
+
+        switch (e.errorMsg) {
+            case 'saveFacePic':
+                return '⚠️ No se pudo procesar la fotografía.\n\nActualice la fotografía del cliente y sincronice nuevamente.';
+
+            default:
+                return '⚠️ Ocurrió un error de sincronización.\n\nPresione Retry para intentar nuevamente.';
+        }
+    } catch {
+        const error = cmd.error.toLowerCase();
+
+        if (error.includes('fetch')) {
+            return '⚠️ No se pudo conectar con el dispositivo.\n\nVerifique la conexión de red y vuelva a intentar.';
+        }
+
+        if (error.includes('unexpected token')) {
+            return '⚠️ El dispositivo respondió con un formato inesperado.\n\nPresione Retry. Si el problema continúa, contacte al administrador.';
+        }
+
+        return '⚠️ Error de sincronización.\n\nPresione Retry para intentar nuevamente.';
+    }
+};
 function formatCurrency(value) {
     if (!value) return '0 Bs';
     return new Intl.NumberFormat('es-BO', {
@@ -284,8 +370,7 @@ const getTagClass = (status) => {
 };
 
 const hasRetry = (sale) => {
-    const relevant = sale.commands?.filter((c) => ['SYNC_MEMBERSHIP', 'SYNC_FACE'].includes(c.type));
-    return relevant?.some((c) => c.status === 'ERROR');
+    return sale.commands?.some((c) => c.type === 'SYNC_USER_FULL' && c.status === 'ERROR');
 };
 
 const retry = async (id) => {
@@ -310,71 +395,44 @@ const retry = async (id) => {
     }
 };
 const canAnnul = (sale) => {
-
     // ya anulada
-    if (sale.status === 'ANNULLED')
-        return false;
+    if (sale.status === 'ANNULLED') return false;
 
     const today = new Date();
 
     const saleDate = new Date(sale.createdAt);
 
-    return (
-        today.getFullYear() === saleDate.getFullYear() &&
-        today.getMonth() === saleDate.getMonth() &&
-        today.getDate() === saleDate.getDate()
-    );
+    return today.getFullYear() === saleDate.getFullYear() && today.getMonth() === saleDate.getMonth() && today.getDate() === saleDate.getDate();
 };
 const confirmAnnul = (sale) => {
-
     selectedSale.value = sale;
 
     annulDialog.value = true;
-
 };
 const annulSale = async () => {
-
     try {
-
-        await MembershipService
-            .annul(
-                selectedSale.value.id
-            );
+        await MembershipService.annul(selectedSale.value.id);
 
         toast.add({
-
             severity: 'success',
 
             summary: 'Éxito',
 
-            detail:
-                'Inscripción anulada'
-
+            detail: 'Inscripción anulada'
         });
 
         annulDialog.value = false;
 
         loadAll();
-
-    }
-
-    catch (error) {
-
+    } catch (error) {
         toast.add({
-
             severity: 'error',
 
             summary: 'Error',
 
-            detail:
-                error.response
-                    ?.data?.message
-                || error.message
-
+            detail: error.response?.data?.message || error.message
         });
-
     }
-
 };
 // =====================
 // INIT
@@ -392,8 +450,7 @@ onMounted(async () => {
         <!-- TOOLBAR -->
         <Toolbar class="mb-6">
             <template #start>
-                <Button v-if="canCreate" label="Vender Membresía" icon="pi pi-plus" severity="secondary"
-                    @click="openCreate" />
+                <Button v-if="canCreate" label="Vender Membresía" icon="pi pi-plus" severity="secondary" @click="openCreate" />
             </template>
         </Toolbar>
 
@@ -406,12 +463,10 @@ onMounted(async () => {
             <InputText v-model="filters.search" placeholder="Cliente..." />
 
             <!-- Plan -->
-            <Dropdown v-model="filters.planId" :options="plans" option-label="name" option-value="id" placeholder="Plan"
-                show-clear />
+            <Dropdown v-model="filters.planId" :options="plans" option-label="name" option-value="id" placeholder="Plan" show-clear />
 
             <!-- Vendedor -->
-            <Dropdown v-model="filters.userId" :options="users" option-label="fullName" option-value="id"
-                placeholder="Vendedor" show-clear />
+            <Dropdown v-model="filters.userId" :options="users" option-label="fullName" option-value="id" placeholder="Vendedor" show-clear />
 
             <!-- Fecha -->
             <Calendar v-model="filters.from" placeholder="Desde" date-format="dd/mm/yy" show-icon />
@@ -427,11 +482,17 @@ onMounted(async () => {
         </div>
         <!-- TABLE -->
 
-        <DataTable v-if="canView" :value="memberships" :loading="loading" paginator :rows="10"
+        <DataTable
+            v-if="canView"
+            :value="memberships"
+            :loading="loading"
+            paginator
+            :rows="10"
             :rows-per-page-options="[10, 20, 50]"
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
             current-page-report-template="Mostrando {first} a {last} de {totalRecords} ventas"
-            responsive-layout="scroll">
+            responsive-layout="scroll"
+        >
             <Column header="Venta">
                 <template #body="{ data }">
                     {{ formatDate(data.saleDate) }}
@@ -472,15 +533,20 @@ onMounted(async () => {
 
             <Column header="Sync">
                 <template #body="{ data }">
-                    <Tag :value="getSyncLabel(syncStatus(data))" :class="getTagClass(syncStatus(data))" />
+                    <Tag
+                        v-tooltip.bottom="{
+                            value: getSyncTooltip(data),
+                            class: 'sync-tooltip'
+                        }"
+                        :value="getSyncLabel(syncStatus(data))"
+                        :class="getTagClass(syncStatus(data))"
+                    />
                 </template>
             </Column>
             <Column header="Acciones">
                 <template #body="{ data }">
-                    <Button v-if="hasRetry(data)" label="Retry" icon="pi pi-refresh" severity="warning"
-                        @click="retry(data.id)" />
-                    <Button v-if="canAnnul(data)" icon="pi pi-times-circle" severity="danger" text rounded
-                        @click="confirmAnnul(data)" />
+                    <Button v-if="hasRetry(data)" icon="pi pi-sync" severity="secondary" text @click="retry(data.id)" />
+                    <Button v-if="canAnnul(data)" icon="pi pi-times" severity="danger" text rounded @click="confirmAnnul(data)" />
                 </template>
             </Column>
         </DataTable>
@@ -490,8 +556,7 @@ onMounted(async () => {
             <!-- CLIENTE -->
             <div class="field">
                 <label>Cliente</label>
-                <AutoComplete v-model="selectedPartner" :suggestions="filteredPartners" option-label="name" field="name"
-                    :min-length="1" dropdown @complete="searchPartners" />
+                <AutoComplete v-model="selectedPartner" :suggestions="filteredPartners" option-label="name" field="name" :min-length="1" dropdown @complete="searchPartners" />
             </div>
 
             <!-- ESTADO -->
@@ -501,27 +566,48 @@ onMounted(async () => {
                     <b>{{ selectedStatus.status }}</b>
                 </small>
                 <br />
-                <small v-if="selectedStatus.endDate"> Vigente hasta: {{ selectedStatus.endDate }} </small>
+                <small v-if="selectedStatus.endDate">Vigente hasta: {{ selectedStatus.endDate }}</small>
             </div>
 
             <!-- PLAN -->
             <div class="field">
                 <label>Plan</label>
-                <Dropdown v-model="form.planId" :options="plans" option-label="name" option-value="id"
-                    placeholder="Seleccionar plan" class="w-full" />
+                <Dropdown v-model="form.planId" :options="plans" option-label="name" option-value="id" placeholder="Seleccionar plan" class="w-full" />
+            </div>
+            <div v-if="selectedPlan" class="mb-3">
+                <strong>Total: {{ formatCurrency(total) }}</strong>
+            </div>
+
+            <div class="mb-3">
+                <div v-for="(payment, index) in form.payments" :key="index" class="grid mb-2">
+                    <div class="col-4">
+                        <Dropdown v-model="payment.method" :options="paymentMethods" option-label="label" option-value="value" class="w-full" />
+                    </div>
+
+                    <div class="col-4">
+                        <InputNumber v-model="payment.amount" mode="decimal" :min="0" class="w-full" />
+                    </div>
+
+                    <div class="col-3">
+                        <InputText v-model="payment.reference" placeholder="Referencia" class="w-full" />
+                    </div>
+
+                    <div class="col-1">
+                        <Button icon="pi pi-trash" severity="danger" text @click="removePayment(index)" />
+                    </div>
+                </div>
+
+                <Button label="Agregar método" icon="pi pi-plus" severity="secondary" text @click="addPayment" />
             </div>
 
             <!-- ACTIONS -->
             <div class="flex justify-content-end gap-2">
                 <Button label="Cancelar" text @click="dialogVisible = false" />
-                <Button label="Confirmar Pago" severity="success" :loading="purchaseLoading" :disabled="purchaseLoading"
-                    @click="purchase" />
+                <Button label="Confirmar Pago" severity="success" :loading="purchaseLoading" :disabled="purchaseLoading" @click="purchase" />
             </div>
         </Dialog>
         <Dialog v-model:visible="annulDialog" header="Anular inscripción" modal :style="{ width: '30rem' }">
-
             <div class="flex flex-column gap-2">
-
                 <span>
                     Cliente:
                     <b>
@@ -536,20 +622,14 @@ onMounted(async () => {
                     </b>
                 </span>
 
-                <span>
-                    ¿Desea anular esta inscripción?
-                </span>
-
+                <span>¿Desea anular esta inscripción?</span>
             </div>
 
             <template #footer>
-
                 <Button label="Cancelar" text @click="annulDialog = false" />
 
                 <Button label="Anular" severity="danger" @click="annulSale" />
-
             </template>
-
         </Dialog>
     </div>
 </template>

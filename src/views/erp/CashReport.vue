@@ -114,7 +114,7 @@ const exportPDF = async () => {
         <!-- Filtros -->
         <div class="col-span-12">
             <Card>
-                <template #title> Reporte de Caja por Período </template>
+                <template #title>Reporte de Caja por Período</template>
                 <template #content>
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12 md:col-span-4">
@@ -190,7 +190,10 @@ const exportPDF = async () => {
                 <Card>
                     <template #content>
                         <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12 md:col-span-2 mt-2"><strong>Caja:</strong> {{ report.cashBox.name }}</div>
+                            <div class="col-span-12 md:col-span-2 mt-2">
+                                <strong>Caja:</strong>
+                                {{ report.cashBox.name }}
+                            </div>
 
                             <div class="col-span-12 md:col-span-4 mt-2">
                                 <strong>Período:</strong>
@@ -212,7 +215,7 @@ const exportPDF = async () => {
             <!-- Detalle de movimientos -->
             <div class="col-span-12">
                 <Card>
-                    <template #title> Detalle de Movimientos </template>
+                    <template #title>Detalle de Movimientos</template>
                     <template #content>
                         <DataTable :value="report.movements" paginator :rows="15" stripedRows responsiveLayout="scroll">
                             <Column field="createdAt" header="Fecha">

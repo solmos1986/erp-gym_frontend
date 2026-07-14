@@ -1,8 +1,8 @@
 <script setup>
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref } from 'vue';
-import permissionTenantService from '../../service/permissionTenant.service';
-import roleTenantService from '../../service/roleTenant.service';
+import PermissionService from '../../service/permission.service';
+import roleTenantService from '../../service/role.service';
 import { useAuthStore } from '../../store/auth.store';
 
 const toast = useToast();
@@ -47,7 +47,8 @@ if (token) {
  * Cargar permisos y roles
  */
 async function loadroles() {
-    const permisos = await permissionTenantService.getAll();
+    console.log('llegue a cargar permisos y roles');
+    const permisos = await PermissionService.getCompanyCatalog();
     allpermissions.value = permisos;
     console.log('all permisos: ', permisos);
     if (!canView.value) return;
@@ -159,35 +160,36 @@ async function remove(role) {
 onMounted(loadroles);
 </script>
 <template>
-    <div class="card">
+    <div>
         <!-- HEADER -->
-        <Toolbar class="mb-6">
-            <template #start>
-                <Button label="Nuevo Rol" v-if="canCreate" icon="pi pi-plus" severity="secondary" class="mr-2"
-                    @click="openCreate" />
-            </template>
 
-            <template #end>
-                <!-- <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" /> -->
-            </template>
-        </Toolbar>
         <div class="flex justify-content-between mb-3">
             <h3>Roles usuarios Tenant</h3>
         </div>
-
+        <Toolbar class="mb-6">
+            <template #start>
+                <Button v-if="canCreate" label="Nuevo Rol" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openCreate" />
+            </template>
+        </Toolbar>
         <!-- LISTADO -->
-        <DataTable v-if="canView" :value="roles" :loading="loading"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rows="20" :rowsPerPageOptions="[5, 10, 25]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} roles">
+        <DataTable
+            v-if="canView"
+            :value="roles"
+            :loading="loading"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rows="20"
+            :rows-per-page-options="[5, 10, 25]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} roles"
+            striped-rows
+            responsive-layout="scroll"
+        >
             <Column field="name" header="Roles" />
 
             <!-- Mostrar Permisos dentro de Tags -->
             <Column header="Permisos">
                 <template #body="{ data }">
                     <div class="permissions-container">
-                        <Tag v-for="permission in data.permissions" :key="permission.permission.code" class="mr-2"
-                            severity="info">
+                        <Tag v-for="permission in data.permissions" :key="permission.permission.code" class="mr-2" severity="info">
                             {{ permission.permission.code }}
                         </Tag>
                     </div>
@@ -197,10 +199,8 @@ onMounted(loadroles);
             <!-- ACCIONES -->
             <Column header="Acción" :exportable="false" style="min-width: 12rem">
                 <template #body="{ data }">
-                    <Button icon="pi pi-pencil" outlined rounded class="mr-2" v-if="canUpdate"
-                        @click="openEdit(data)" />
-                    <Button icon="pi pi-trash" outlined rounded severity="danger" v-if="canDelete"
-                        @click="remove(data)" />
+                    <Button v-if="canUpdate" icon="pi pi-pencil" outlined rounded class="mr-2" @click="openEdit(data)" />
+                    <Button v-if="canDelete" icon="pi pi-trash" outlined rounded severity="danger" @click="remove(data)" />
                 </template>
             </Column>
         </DataTable>
@@ -219,8 +219,7 @@ onMounted(loadroles);
 
             <div class="field mb-3">
                 <label>Permisos</label>
-                <MultiSelect v-model="form.permissionIds" :options="allpermissions" optionLabel="code" optionValue="id"
-                    class="w-full" placeholder="Seleccionar permisos" />
+                <MultiSelect v-model="form.permissionIds" :options="allpermissions" option-label="code" option-value="id" class="w-full" placeholder="Seleccionar permisos" />
             </div>
 
             <div class="flex justify-content-end gap-2">

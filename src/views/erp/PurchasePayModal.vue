@@ -67,7 +67,10 @@ function closeModal() {
 <template>
     <Dialog :visible="visible" modal header="Registrar Pago" style="width: 600px" @hide="emit('close')">
         <div v-if="purchase">
-            <div class="mb-2"><b>Total compra:</b> Bs {{ purchase.total }}</div>
+            <div class="mb-2">
+                <b>Total compra:</b>
+                Bs {{ purchase.total }}
+            </div>
 
             <div v-for="(p, i) in payments" :key="i" class="flex gap-2 mb-2">
                 <Dropdown v-model="p.methodOptionId" :options="paymentMethods" optionLabel="name" optionValue="id" placeholder="Método" />

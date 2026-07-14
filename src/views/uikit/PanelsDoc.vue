@@ -51,7 +51,7 @@ function toggle() {
                     </IconField>
                 </template>
 
-                <template #end> <SplitButton label="Save" :model="items"></SplitButton></template>
+                <template #end><SplitButton label="Save" :model="items"></SplitButton></template>
             </Toolbar>
         </div>
 

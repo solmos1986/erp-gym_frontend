@@ -6,6 +6,7 @@ class PartnerService {
      * puedes pasar filtros opcionales (isActive, search, etc)
      */
     static async getAll(params = {}) {
+        console.log('Fetching partners with params:', params); // debug opcional
         const { data } = await api.get('/partners', { params });
         return data;
     }
@@ -73,6 +74,19 @@ class PartnerService {
 
     static async activate(id) {
         const { data } = await api.put(`/partners/${id}/activate`);
+        return data;
+    }
+
+    /**
+     * 📥 Importar clientes desde Excel
+     */
+    static async importExcel(formData) {
+        const { data } = await api.post('/partners/import-excel', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
         return data;
     }
 }
