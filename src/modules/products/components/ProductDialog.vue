@@ -1,10 +1,12 @@
 <script setup>
+import Popover from 'primevue/popover';
 import ToggleSwitch from 'primevue/toggleswitch';
+import { useToast } from 'primevue/usetoast';
 import { computed, reactive, ref, watch } from 'vue';
 const visible = defineModel('visible');
 
 const emit = defineEmits(['save']);
-
+const toast = useToast();
 const props = defineProps({
     categories: {
         type: Array,
@@ -22,7 +24,11 @@ const props = defineProps({
         default: () => []
     }
 });
+const costInfo = ref();
 
+const toggleCostInfo = (event) => {
+    costInfo.value.toggle(event);
+};
 // =====================================================
 // FORMULARIO
 // =====================================================
@@ -65,7 +71,7 @@ function defaultForm() {
         bom: {
             name: '',
             description: '',
-            indirectCostPercent: 10,
+            indirectCostPercent: 0,
 
             items: []
         }
@@ -250,6 +256,12 @@ function addItem() {
     const exists = form.bom.items.find((item) => item.materialId === selectedMaterial.value.id);
 
     if (exists) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Materia Prima duplicada',
+            detail: `La materia prima "${selectedMaterial.value.name}" ya forma parte de esta receta.`,
+            life: 3000
+        });
         selectedMaterial.value = null;
         return;
     }
@@ -386,13 +398,13 @@ function saveProduct() {
 
                     <div class="flex flex-wrap gap-4">
                         <div class="flex flex-col grow basis-0 gap-2">
-                            <label>Código</label>
+                            <label class="required">Código</label>
 
                             <InputText v-model="form.code" class="w-full" />
                         </div>
 
                         <div class="flex flex-col grow basis-0 gap-2">
-                            <label>Nombre</label>
+                            <label class="required">Nombre</label>
 
                             <InputText v-model="form.name" class="w-full" />
                         </div>
@@ -412,13 +424,13 @@ function saveProduct() {
 
                     <div class="flex flex-wrap gap-4">
                         <div class="flex flex-col grow basis-0 gap-2">
-                            <label>Categoría</label>
+                            <label class="required">Categoría</label>
 
                             <Dropdown v-model="form.productCategoryId" :options="categories" option-label="name" option-value="id" placeholder="Seleccione..." class="w-full" />
                         </div>
 
                         <div class="flex flex-col grow basis-0 gap-2">
-                            <label>Unidad</label>
+                            <label class="required">Unidad</label>
 
                             <Dropdown v-model="form.unit" :options="units" option-label="label" option-value="value" class="w-full" />
                         </div>
@@ -428,13 +440,13 @@ function saveProduct() {
 
                     <div class="flex flex-wrap gap-4">
                         <div class="flex flex-col grow basis-0 gap-2">
-                            <label>Tipo de Producto</label>
+                            <label class="required">Tipo de Producto</label>
 
                             <Dropdown v-model="form.productType" :options="productTypes" option-label="label" option-value="value" class="w-full" />
                         </div>
 
                         <div v-if="form.productType !== 'SERVICE'" class="flex flex-col grow basis-0 gap-2">
-                            <label>¿Cómo obtiene este producto?</label>
+                            <label class="required">¿Cómo obtiene este producto?</label>
 
                             <Dropdown v-model="form.sourceType" :options="sourceTypes" option-label="label" option-value="value" class="w-full" />
                         </div>
@@ -447,6 +459,13 @@ function saveProduct() {
                             <label>Código de Barras</label>
 
                             <InputText v-model="form.barcode" class="w-full" />
+                        </div>
+                        <div class="flex flex-col grow basis-0 gap-2">
+                            <label class="required">Precio de Venta *</label>
+
+                            <InputNumber v-model="form.salePrice" class="w-full" mode="currency" currency="BOB" locale="es-BO" :min="0" />
+
+                            <small class="text-500">Precio utilizado en ventas.</small>
                         </div>
                     </div>
 
@@ -553,26 +572,18 @@ function saveProduct() {
 
                                     <InputNumber v-model="form.costPrice" class="w-full" mode="currency" currency="BOB" locale="es-BO" disabled />
 
-                                    <small class="text-500">Se actualiza automáticamente desde Compras y Producción.</small>
+                                    <small class="text-500 mb-3">Se actualiza automáticamente desde Compras y Producción.</small>
                                 </div>
 
-                                <div class="flex flex-col grow basis-0 gap-2">
-                                    <label>Precio de Venta *</label>
-
-                                    <InputNumber v-model="form.salePrice" class="w-full" mode="currency" currency="BOB" locale="es-BO" :min="0" />
-
-                                    <small class="text-500">Precio utilizado en ventas.</small>
-                                </div>
+                                <div class="flex flex-col grow basis-0 gap-2"></div>
                             </div>
                         </div>
 
-                        <Message severity="info" :closable="false">
-                            <strong>Importante</strong>
+                        <div class="flex align-items-center gap-2 mb-3">
+                            <span class="font-semibold">Inventario</span>
 
-                            <br />
-
-                            El stock y el costo serán administrados automáticamente mediante los movimientos de inventario.
-                        </Message>
+                            <i v-tooltip.top="'El stock y el costo serán administrados automáticamente mediante los movimientos de inventario.'" class="pi pi-info-circle text-primary cursor-pointer" style="font-size: 1rem"></i>
+                        </div>
                     </div>
 
                     <!-- ===================================================== -->
@@ -580,41 +591,16 @@ function saveProduct() {
                     <!-- ===================================================== -->
 
                     <div v-if="form.productType === 'FINISHED_PRODUCT' && (form.sourceType === 'PRODUCTION' || form.sourceType === 'BOTH')">
-                        <Message severity="success" :closable="false">
-                            <div class="flex align-items-start gap-3">
-                                <i class="pi pi-box text-2xl"></i>
+                        <div class="flex align-items-center gap-2 mb-3">
+                            <span class="font-semibold">Abastecimiento: PRODUCCIÓN</span>
 
-                                <div>
-                                    <div class="font-semibold mt-1">Abastecimiento: PRODUCCIÓN</div>
-
-                                    <div class="mt-2">Este producto será fabricado utilizando las materias primas definidas en esta Lista de Materiales (BOM).</div>
-                                </div>
-                            </div>
-                        </Message>
-
+                            <i v-tooltip.top="'Este producto será fabricado utilizando las materias primas definidas en esta Lista de Materiales (BOM).'" class="pi pi-info-circle text-primary cursor-pointer" style="font-size: 1rem"></i>
+                        </div>
                         <div class="mt-4">
                             <div class="font-semibold text-2xl">Lista de Materiales (BOM)</div>
 
                             <div class="text-500 mt-2">Agregue las materias primas necesarias para fabricar este producto.</div>
                         </div>
-
-                        <!-- =====================================================-->
-                        <!-- DATOS DEL BOM -->
-                        <!-- ===================================================== -->
-
-                        <!-- <div class="flex flex-wrap gap-4 mt-5">
-                            <div class="flex flex-col grow basis-0 gap-2">
-                                <label>Nombre del BOM</label>
-
-                                <InputText v-model="form.bom.name" placeholder="Ej. Receta Principal" />
-                            </div>
-
-                            <div class="flex flex-col grow basis-0 gap-2">
-                                <label>Descripción</label>
-
-                                <InputText v-model="form.bom.description" placeholder="Opcional" />
-                            </div>
-                        </div>  -->
 
                         <!-- ===================================================== -->
                         <!-- AGREGAR MATERIA PRIMA -->
@@ -627,7 +613,7 @@ function saveProduct() {
                                 <AutoComplete v-model="selectedMaterial" :suggestions="filteredMaterials" option-label="name" dropdown fluid placeholder="Buscar materia prima..." @complete="searchMaterials" />
                             </div>
 
-                            <Button label="Agregar" icon="pi pi-plus" severity="success" @click="addItem" />
+                            <Button label="Agregar" class="mt-6" icon="pi pi-plus" severity="success" @click="addItem" />
                         </div>
                         <!-- ===================================================== -->
                         <!-- MATERIAS PRIMAS -->
@@ -702,7 +688,7 @@ function saveProduct() {
                                 <div class="cost-box">
                                     <span class="label">Costo de Producción</span>
                                     <br />
-                                    <span class="text-green-600 text-4xl font-bold">Bs. {{ productionCost.toFixed(2) }}</span>
+                                    <span class="text-green-600 text-3xl font-bold">Bs. {{ productionCost.toFixed(2) }}</span>
                                 </div>
                             </div>
 
@@ -719,7 +705,7 @@ function saveProduct() {
                                 <div class="cost-box">
                                     <span class="label text-500">Costo Total</span>
                                     <br />
-                                    <span class="text-900 text-4xl font-bold">Bs. {{ totalProductionCost.toFixed(2) }}</span>
+                                    <span class="text-900 text-3xl font-bold">Bs. {{ totalProductionCost.toFixed(2) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -728,33 +714,30 @@ function saveProduct() {
                         <!-- INFORMACIÓN -->
                         <!-- ===================================================== -->
 
-                        <Message severity="info" :closable="false" class="mt-4">
-                            <div class="flex align-items-start gap-3">
-                                <i class="pi pi-info-circle text-2xl"></i>
+                        <div class="flex align-items-center gap-2">
+                            <span class="font-semibold mt-2.5">Costos de Producción</span>
 
-                                <div>
-                                    <div class="font-semibold">Información sobre los costos</div>
+                            <Button icon="pi pi-info-circle text-primary" text rounded severity="secondary" class="p-0 w-2rem h-2rem" @click="toggleCostInfo" />
+                            <Popover ref="costInfo">
+                                <div class="w-22rem">
+                                    <div class="text-lg font-semibold mb-3">Información sobre los costos</div>
 
-                                    <div class="mt-2">
+                                    <p class="mb-3">
                                         El costo de producción se calcula utilizando el
                                         <strong>costo actual</strong>
                                         de cada materia prima.
-                                    </div>
+                                    </p>
 
-                                    <div class="mt-2">
-                                        Los costos son actualizados automáticamente mediante:
+                                    <div class="font-semibold mb-2">Los costos se actualizan mediante:</div>
 
-                                        <ul class="mt-2 ml-3">
-                                            <li>Inventario Inicial</li>
-
-                                            <li>Compras</li>
-
-                                            <li>Producción</li>
-                                        </ul>
-                                    </div>
+                                    <ul class="pl-3 m-0">
+                                        <li>Inventario Inicial</li>
+                                        <li>Compras</li>
+                                        <li>Producción</li>
+                                    </ul>
                                 </div>
-                            </div>
-                        </Message>
+                            </Popover>
+                        </div>
                     </div>
                     <!-- ===================================================== -->
                     <!-- SERVICIOS -->
@@ -789,6 +772,12 @@ function saveProduct() {
 <style scoped>
 :deep(.product-dialog .p-dialog-title) {
     font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.required::after {
+    content: ' *';
+    color: #ef4444;
     font-weight: 700;
 }
 </style>

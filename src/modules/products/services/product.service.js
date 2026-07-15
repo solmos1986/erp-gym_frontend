@@ -13,6 +13,7 @@ class ProductService {
      * 🔍 Obtener producto
      */
     static async getById(id) {
+        console.log('🚀 ~ file: product.service.js:11 ~ ProductService ~ getById ~ id:');
         const { data } = await api.get(`/products/${id}`);
         return data;
     }
@@ -29,6 +30,7 @@ class ProductService {
      * ✏️ Actualizar producto
      */
     static async update(id, payload) {
+        console.log('🚀 ~ file: product.service.js:22 ~ ProductService ~ update ~ payload:');
         const { data } = await api.put(`/products/${id}`, payload);
         return data;
     }

@@ -56,12 +56,25 @@ async function openCreate() {
 }
 
 async function openEdit(product) {
-    console.log('editing product');
+    try {
+        console.log('editing product');
 
-    await loadMaterials();
+        await loadMaterials();
 
-    editingProduct.value = { ...product };
-    dialogVisible.value = true;
+        const fullProduct = await ProductService.getById(product.id);
+
+        editingProduct.value = fullProduct;
+
+        dialogVisible.value = true;
+    } catch (error) {
+        console.error('Error cargando producto:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo cargar el producto.',
+            life: 3000
+        });
+    }
 }
 
 async function save(form) {
