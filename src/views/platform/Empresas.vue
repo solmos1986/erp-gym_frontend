@@ -23,12 +23,27 @@ const logoPreview = ref(null);
 /**
  * 🔥 FORM CORRECTO (ALINEADO AL BACKEND)
  */
+const costMethods = [
+    {
+        label: 'Promedio Ponderado',
+        value: 'WEIGHTED_AVERAGE'
+    },
+    {
+        label: 'FIFO (Primero en Entrar, Primero en Salir)',
+        value: 'FIFO'
+    },
+    {
+        label: 'Costo Estándar',
+        value: 'STANDARD'
+    }
+];
 const getEmptyForm = () => ({
     name: '',
     fullName: '',
     email: '',
     password: '',
-    businessTemplateId: null
+    businessTemplateId: null,
+    costMethod: 'WEIGHTED_AVERAGE'
 });
 
 const form = ref(getEmptyForm());
@@ -53,7 +68,18 @@ const businessTemplates = ref([]);
  *
  * Load
  */
-
+const formatCostMethod = (method) => {
+    switch (method) {
+        case 'WEIGHTED_AVERAGE':
+            return 'Promedio Ponderado';
+        case 'FIFO':
+            return 'FIFO';
+        case 'STANDARD':
+            return 'Costo Estándar';
+        default:
+            return '-';
+    }
+};
 async function loadCompanies() {
     if (!canView.value) return;
 
@@ -120,7 +146,8 @@ function openEdit(company) {
         fullName: company.owner?.fullName || '',
         email: company.owner?.email || '',
         password: '', // 🔥 nunca cargar real
-        businessTemplateId: company.businessTemplate?.id || null
+        businessTemplateId: company.businessTemplate?.id || null,
+        costMethod: company.costMethod || 'WEIGHTED_AVERAGE'
     };
 
     dialogVisible.value = true;
@@ -177,7 +204,8 @@ async function save() {
             name: form.value.name,
             fullName: form.value.fullName,
             email: form.value.email,
-            businessTemplateId: form.value.businessTemplateId
+            businessTemplateId: form.value.businessTemplateId,
+            costMethod: form.value.costMethod
         };
 
         // 🔐 password opcional
@@ -340,6 +368,11 @@ onMounted(() => {
 
                 <Column field="name" header="Nombre" />
                 <Column field="businessTemplate.name" header="Tipo" />
+                <Column field="costMethod" header="Método de Costo">
+                    <template #body="{ data }">
+                        <Tag :value="formatCostMethod(data.costMethod)" severity="info" />
+                    </template>
+                </Column>
                 <Column header="Estado">
                     <template #body="{ data }">
                         <Tag :value="data.isActive ? 'Activa' : 'Inactiva'" :severity="data.isActive ? 'success' : 'danger'" />
@@ -375,6 +408,11 @@ onMounted(() => {
                 <label>Tipo de Empresa</label>
 
                 <Dropdown v-model="form.businessTemplateId" :options="businessTemplates" option-label="name" option-value="id" placeholder="Seleccione un tipo de empresa" class="w-full" />
+            </div>
+            <div class="field">
+                <label>Método de Valoración</label>
+
+                <Dropdown v-model="form.costMethod" :options="costMethods" option-label="label" option-value="value" placeholder="Seleccione un método" class="w-full" />
             </div>
             <div class="field mb-3">
                 <input type="file" accept="image/*" @change="onLogoChange" />

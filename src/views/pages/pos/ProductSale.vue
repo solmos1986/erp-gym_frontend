@@ -1,6 +1,6 @@
 <script setup>
+import ProductService from '@/modules/products/services/product.service.js';
 import PartnerService from '@/service/partner.service';
-import ProductService from '@/service/product.service';
 import ProductSaleService from '@/service/productSale.service';
 import SaleService from '@/service/sale.service';
 import Select from 'primevue/select';
@@ -67,7 +67,9 @@ const form = ref({
 // =========================
 
 const total = computed(() => {
-    return cartItems.value.reduce((sum, item) => sum + Number(item.salePrice || 0) * Number(item.quantity || 0), 0);
+    return cartItems.value.reduce((sum, item) => {
+        return sum + Number(item.productBranches[0]?.salePrice || 0) * Number(item.quantity || 0);
+    }, 0);
 });
 const productSales = computed(() => sales.value.filter((sale) => sale.details?.some((detail) => detail.itemType === 'PRODUCT')));
 
@@ -112,6 +114,7 @@ async function loadSales() {
 async function loadProducts() {
     try {
         products.value = await ProductService.getAll({ Active: true });
+        console.log('products.value ', products.value);
     } catch (error) {
         console.error(error);
     }
@@ -369,7 +372,7 @@ onMounted(async () => {
                 <Column field="name" header="Producto" />
 
                 <Column header="Precio">
-                    <template #body="{ data }">Bs {{ data.salePrice }}</template>
+                    <template #body="{ data }">Bs {{ data.productBranches[0]?.salePrice }}</template>
                 </Column>
 
                 <Column header="Cantidad">
@@ -379,7 +382,7 @@ onMounted(async () => {
                 </Column>
 
                 <Column header="Subtotal">
-                    <template #body="{ data }">Bs {{ data.salePrice * data.quantity }}</template>
+                    <template #body="{ data }">Bs {{ data.productBranches[0]?.salePrice * data.quantity }}</template>
                 </Column>
 
                 <Column header="">
@@ -430,7 +433,7 @@ onMounted(async () => {
                     <Column field="quantity" header="Cantidad" />
 
                     <Column header="Precio">
-                        <template #body="{ data }">Bs {{ data.unitPrice }}</template>
+                        <template #body="{ data }">{{ data.productBranches[0]?.salePrice }}</template>
                     </Column>
 
                     <Column header="Total">

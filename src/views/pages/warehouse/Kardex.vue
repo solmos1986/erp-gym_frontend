@@ -1,8 +1,8 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 
+import ProductService from '@/modules/products/services/product.service';
 import InventoryKardexService from '@/service/kardex.service';
-import ProductService from '@/service/product.service';
 
 const loading = ref(false);
 

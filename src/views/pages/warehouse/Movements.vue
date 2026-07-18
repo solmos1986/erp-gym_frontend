@@ -2,8 +2,8 @@
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref } from 'vue';
 
+import ProductService from '@/modules/products/services/product.service';
 import InventoryMovementService from '@/service/inventoryMovement.service';
-import ProductService from '@/service/product.service';
 
 import { useAuthStore } from '@/store/auth.store';
 

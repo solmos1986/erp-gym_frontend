@@ -1,6 +1,6 @@
 <script setup>
+import ProductService from '@/modules/products/services/product.service';
 import PartnerService from '@/service/partner.service';
-import ProductService from '@/service/product.service';
 import PurchaseService from '@/service/productPurchase.service';
 
 import Select from 'primevue/select';

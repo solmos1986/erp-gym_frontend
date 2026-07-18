@@ -116,14 +116,16 @@ watch(
 
         form.unit = product.unit;
 
-        form.costPrice = Number(product.costPrice ?? 0);
-        form.salePrice = Number(product.salePrice ?? 0);
+        const branchData = product.productBranches?.[0];
 
-        form.currentStock = Number(product.currentStock ?? 0);
+        form.costPrice = Number(branchData?.costPrice ?? 0);
+        form.salePrice = Number(branchData?.salePrice ?? 0);
 
-        form.minStock = Number(product.minStock ?? 0);
-        form.maxStock = Number(product.maxStock ?? 0);
-        form.reorderPoint = Number(product.reorderPoint ?? 0);
+        form.currentStock = Number(branchData?.currentStock ?? 0);
+
+        form.minStock = Number(branchData?.minStock ?? 0);
+        form.maxStock = Number(branchData?.maxStock ?? 0);
+        form.reorderPoint = Number(branchData?.reorderPoint ?? 0);
 
         form.isActive = product.isActive;
 
@@ -153,7 +155,7 @@ watch(
 
                 unit: item.material.unit,
 
-                unitCost: Number(item.material.costPrice ?? 0),
+                unitCost: Number(item.material.productBranches?.[0]?.costPrice ?? 0),
 
                 quantity: Number(item.quantity),
 
@@ -275,7 +277,7 @@ function addItem() {
 
         unit: selectedMaterial.value.unit,
 
-        unitCost: Number(selectedMaterial.value.costPrice ?? 0),
+        unitCost: Number(selectedMaterial.value.productBranches?.[0]?.costPrice ?? 0),
 
         quantity: 1,
 
