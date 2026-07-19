@@ -186,11 +186,14 @@ onMounted(async () => {
             <Column field="productType" header="Tipo" />
 
             <Column header="Costo">
-                <template #body="{ data }">Bs Bs {{ Number(data.productBranches[0]?.costPrice ?? 0).toFixed(2) }}</template>
+                <template #body="{ data }">Bs {{ Number(data.productBranches[0]?.unitCost ?? 0).toFixed(2) }}</template>
             </Column>
 
             <Column header="Precio Venta">
                 <template #body="{ data }">Bs {{ Number(data.productBranches[0]?.salePrice ?? 0).toFixed(2) }}</template>
+            </Column>
+            <Column header="productBranch.currentStock">
+                <template #body="{ data }">{{ Number(data.productBranches[0]?.currentStock ?? 0).toFixed(2) }}</template>
             </Column>
 
             <Column header="Estado">

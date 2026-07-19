@@ -332,6 +332,11 @@ onMounted(async () => {
                     <strong>Bs {{ data.total }}</strong>
                 </template>
             </Column>
+            <Column header="UnitCost">
+                <template #body="{ data }">
+                    <strong>Bs {{ data.details[0].unitCost }}</strong>
+                </template>
+            </Column>
             <Column header="Acciones">
                 <template #body="{ data }">
                     <Button icon="pi pi-eye" text rounded @click="viewSale(data)" />

@@ -203,7 +203,8 @@ onMounted(async () => {
             </Column>
 
             <Column field="quantity" header="Cantidad" />
-
+            <Column field="unitCost" header="Precio" />
+            <Column field="status" header="Estado" />
             <Column header="Usuario">
                 <template #body="{ data }">
                     {{ data.createdBy?.fullName }}
